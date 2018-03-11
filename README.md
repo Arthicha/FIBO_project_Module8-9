@@ -1,4 +1,4 @@
-"# FIBO_project_Module8-9 Group 2"
+# FIBO_project_Module8-9 Group 2
 ###### institute of FIeld RObotics (FIBO)
 ###### King Mongkut University of Technology Thonburi (KMUTT)
 
