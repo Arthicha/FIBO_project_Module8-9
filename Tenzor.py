@@ -59,7 +59,7 @@ class TenzorCNN:
 
     def CNN2(self,x,hidden_layer,kernel_size,pool_size,strides,image_size,keep_prob=1.0):
         image_batch = x
-        imgZ = image_size[0]*image_size[0]
+        imgZ = image_size[0]*image_size[1]
         for i in range(0,len(hidden_layer)-1):
             if i == 0:
                 input_neurons = image_batch
@@ -72,9 +72,11 @@ class TenzorCNN:
             with tf.name_scope("pool"+str(i)):
                 self.pool.append(tf.layers.max_pooling2d(inputs=self.conv_relu[-1], pool_size=pool_size[i], strides=strides[i]))
                 imgZ = imgZ//(pool_size[i][0]*pool_size[i][1])
+            print('imgZ',imgZ)
 
         with tf.name_scope("dense"):
             # The 'images' are now 7x7 (28 / 2 / 2), and we have 64 channels per image
+            print('imgzzz',imgZ)
             pool_flat = tf.reshape(self.pool[-1], [-1, imgZ *hidden_layer[-2]])
             dense = tf.layers.dense(inputs=pool_flat, units=hidden_layer[-1], activation=tf.nn.relu)
 

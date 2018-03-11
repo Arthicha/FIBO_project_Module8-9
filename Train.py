@@ -108,11 +108,11 @@ elif DATA is 'PROJECT':
 CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[3,3],[3,3]]
+KERNEL_SIZE = [[6,3],[6,3]]
 POOL_SIZE = [[2,2],[3,3]]
 STRIDE_SIZE = [2,3]
 
-BATCH_SIZE = 3800
+BATCH_SIZE = 1000
 
 LEARNING_RATE = 0.001
 KEEP_PROB = 0.9
@@ -140,11 +140,11 @@ elif DATA is 'PROJECT':
                        'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
                        'SevenTH','EightTH','NineTH']
     for s in range(0,3):
+        print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
             object = listOfClass[j]
-            print('process the data:',str(s),str(object))
-            f = open('data0-9compress\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:-1]
+            f = open('data0-9compress\\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
+            image = str(f.read()).split('\n')[:1000]
             f.close()
             delList = []
             for i in range(len(image)):
@@ -155,11 +155,13 @@ elif DATA is 'PROJECT':
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             obj[j] = 1
             LabelTTT[s] += np.full((len(image),N_CLASS),obj).tolist()
+
 if DATA is 'MNIST':
     testingSet  = [mnist.test.images,mnist.test.labels]
     trainingSet = [mnist.train.images,mnist.train.labels]
     validationSet = [mnist.validation.images,mnist.validation.labels]
 elif DATA is 'PROJECT':
+    print('STATUS: shuffle-ing')
     def shuffly(a,b):
         c = list(zip(a, b))
         random.shuffle(c)
@@ -172,7 +174,7 @@ elif DATA is 'PROJECT':
     #a,b = shuffly(TestTrainValidate[2],LabelTTT[2])
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[0],LabelTTT[0]]
-    validationSet = [TestTrainValidate[2],LabelTTT[2]]
+    validationSet = [TestTrainValidate[0],LabelTTT[0]]
 
 
 
@@ -497,6 +499,7 @@ def randCNN(size,multy=8):
 
 
 best_accuracy = 0.00
+print('STATUS: main program have started')
 try:
     if model is 'CNN':
         filename = 'CNN'
@@ -513,17 +516,17 @@ try:
 except:
     best_accuracy = 0.00
 if(1):
-
-    print('droupout',KEEP_PROB)
-    print('learning rate',LEARNING_RATE)
-    print('batch',BATCH_SIZE)
+    print('STATUS: model connfiguration')
+    print('STATUS: droupout',KEEP_PROB)
+    print('STATUS: learning rate',LEARNING_RATE)
+    print('STATUS: batch',BATCH_SIZE)
     if model is 'CNN':
         HL = CNN_HIDDEN_LAYER
-        print('cnn_layer',CNN_HIDDEN_LAYER)
+        print('STATUS: cnn_layer',CNN_HIDDEN_LAYER)
     elif model is 'LATENT':
         HL = AE_HIDDEN_LAYER
-        print('ae_layer',AE_HIDDEN_LAYER)
-    print('nn_layer',NN_HIDDEN_LAYER)
+        print('STATUS: ae_layer',AE_HIDDEN_LAYER)
+    print('STATUS: nn_layer',NN_HIDDEN_LAYER)
     accuracy = main(best_accuracy, model = model,aug=AUGMENT,value=AUG_VALUE,GETT_PATH = GETT_PATH,SAVE_PATH=SAVE_PATH,MAIN_HIDDEN_LAYER = HL,NN_HIDDEN_LAYER = NN_HIDDEN_LAYER,
          BATCH_SIZE = BATCH_SIZE,BATCH2PRINT = BATCH2PRINT,EPOCH = EPOCH,LEARNING_RATE = LEARNING_RATE,KEEP_PROB = KEEP_PROB)
 

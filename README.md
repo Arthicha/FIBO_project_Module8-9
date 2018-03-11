@@ -6,7 +6,7 @@
 - Chaiyaporn  Boonyasathian     chaiya45689@gmail.com
 - Jirapat     Thasingthong
 - Kaewkirati  Boukaew
-- Kitti       Pongaksorn
+- Kitti       Pongaksorn        bosskitti7983@gmail.com
 - Lucksawan   Yutthanakorn
 - Naris       Asawalertsak
 - Penpat      Ritprapa          zefirosfenix@gmail.com
