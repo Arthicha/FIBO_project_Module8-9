@@ -9,14 +9,14 @@
 - Kitti       Pongaksorn
 - Lucksawan   Yutthanakorn
 - Naris       Asawalertsak
-- Penpat      Ritprapa
+- Penpat      Ritprapa          zefirosfenix@gmail.com
 - Phurin      Rangpong
 - Rath        Phutthitada
 - Sirin       Tangpoolcharoen
 
 ## Description
 + MNIST_data : MNIST 0-9 dataset
-+ data0-9compress: dataset that is used in term project (txt file)
++ data0-9compress: dataset that is used in term project (zip file; use have to unzip them)
 + IP_ADDR.py : Image_Processing_And_Do_something_to_make_Dataset_be_Ready class
     * Binarization
     * Noise Removal

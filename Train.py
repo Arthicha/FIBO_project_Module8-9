@@ -64,14 +64,14 @@ AUG_VALUE = [20,3]
 DATA = 'PROJECT'
 
 # choose machine learning model 'LATENT' or 'CNN'
-model = 'LATENT'
+model = 'CNN'
 
 # continue previous model
 CONTINUE = False
 
 # save and get path
 GETT_PATH = None#"D:\\2560\FRA361_Robot_Studio\Tensorflow\model"#None
-SAVE_PATH = "D:\\2560\FRA361_Robot_Studio\Tensorflow\model"
+SAVE_PATH = "D:\\2560\FRA361_Robot_Studio\FIBO_project_Module8-9\model"
 
 
 BATCH2PRINT = 20
@@ -102,19 +102,19 @@ if DATA is 'MNIST':
     imgSize = [28,28] # size of image
     N_CLASS = 10
 elif DATA is 'PROJECT':
-    imgSize = [28,28]
+    imgSize = [60,30]
     N_CLASS = 30
 
 CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
 KERNEL_SIZE = [[3,3],[3,3]]
-POOL_SIZE = [[2,2],[2,2]]
-STRIDE_SIZE = [2,2]
+POOL_SIZE = [[2,2],[3,3]]
+STRIDE_SIZE = [2,3]
 
-BATCH_SIZE = 2000
+BATCH_SIZE = 3800
 
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 KEEP_PROB = 0.9
 MULTI_COLUMN = 1
 
@@ -150,7 +150,7 @@ elif DATA is 'PROJECT':
             for i in range(len(image)):
                 image[i] = np.fromstring(image[i], dtype=float, sep=',')
                 image[i] = np.array(image[i])
-                image[i] = np.reshape(image[i],(28*28))
+                image[i] = np.reshape(image[i],(60*30))
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             obj[j] = 1
@@ -183,7 +183,6 @@ elif DATA is 'PROJECT':
 *************************************************'''
 
 def accuracyPlot(y,graphName,xLabel,yLabel,saveAs):
-
     fig = plt.figure()
     ax = plt.subplot(111)
     ax.plot(y)
@@ -514,16 +513,17 @@ try:
 except:
     best_accuracy = 0.00
 if(1):
-    print('cnn_layer',CNN_HIDDEN_LAYER)
+
     print('droupout',KEEP_PROB)
     print('learning rate',LEARNING_RATE)
     print('batch',BATCH_SIZE)
-    print('nn_layer',NN_HIDDEN_LAYER)
     if model is 'CNN':
         HL = CNN_HIDDEN_LAYER
+        print('cnn_layer',CNN_HIDDEN_LAYER)
     elif model is 'LATENT':
         HL = AE_HIDDEN_LAYER
-
+        print('ae_layer',AE_HIDDEN_LAYER)
+    print('nn_layer',NN_HIDDEN_LAYER)
     accuracy = main(best_accuracy, model = model,aug=AUGMENT,value=AUG_VALUE,GETT_PATH = GETT_PATH,SAVE_PATH=SAVE_PATH,MAIN_HIDDEN_LAYER = HL,NN_HIDDEN_LAYER = NN_HIDDEN_LAYER,
          BATCH_SIZE = BATCH_SIZE,BATCH2PRINT = BATCH2PRINT,EPOCH = EPOCH,LEARNING_RATE = LEARNING_RATE,KEEP_PROB = KEEP_PROB)
 
