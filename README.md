@@ -18,6 +18,16 @@
 + MNIST_data : MNIST 0-9 dataset
 + data0-9compress: dataset that is used in term project (txt file)
 + IP_ADDR.py : Image_Processing_And_Do_something_to_make_Dataset_be_Ready class
+    * Binarization
+    * Noise Removal
+    * Capturing Image
+    * Blur
+    * Morphological Transformation
+    * Perspective Transformation
+    * Rotation
+    * Distortion
+    * Magnification
+    * Font2Image
 + Tenzor.py : tensorflow machine learning model class consist of 3 model
     * Neural Network (NN)
     * Convolutional Neural Network (CNN)
