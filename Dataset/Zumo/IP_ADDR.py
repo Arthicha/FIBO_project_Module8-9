@@ -1,5 +1,5 @@
 __author__ = ['Zumo', 'Tew', 'Wisa']
-__version__ = 1.11
+__version__ = 1.10
 # Fin all need function no comment though will add later
 #                                           BY TEW
 
