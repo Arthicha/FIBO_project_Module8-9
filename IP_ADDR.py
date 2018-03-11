@@ -1,5 +1,5 @@
 __author__ = ['Zumo', 'Tew', 'Wisa']
-__version__ = 1.10
+__version__ = 1.11
 # Fin all need function no comment though will add later
 #                                           BY TEW
 
@@ -11,14 +11,13 @@ from os import listdir
 from os.path import isfile, join
 from PIL import Image, ImageFont, ImageDraw
 from Foundation import Binarization, Filter
-from Foundation.Plate import Plate
 
 
 class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     # def __init__(self):
     # GLOBAL
     SHAPE = (640, 480)
-    CREATE_SHAPE = (320, 240)
+    CREATE_SHAPE = (320, 320)
 
     # Binarization Mode
     OTSU_THRESHOLDING = 0
@@ -73,7 +72,8 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
 
     # pass
 
-    def binarize(image, method = OTSU_THRESHOLDING, value=None):
+
+    def binarize(image, method=OTSU_THRESHOLDING, value=None):
         if method == __class__.OTSU_THRESHOLDING:
             img = Binarization.Binarization_Otsu(image)
         elif method == __class__.ADAPTIVE_CONTRAST_THRESHOLDING:
@@ -89,8 +89,15 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         else:
             sys.exit("Unknown method\n")
         return img
+    # Binarize image into two value 255 or 0
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.binarize(img,method=ipaddr.OTSU_THRESHOLDING)
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
-    def remove_noise(image, method = KUWAHARA, value=5):
+    def remove_noise(image, method=KUWAHARA, value=5):
         if method == __class__.KUWAHARA:
             img = Filter.Filter_Kuwahara(image, value)
         elif method == __class__.WIENER:
@@ -100,29 +107,24 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         else:
             sys.exit("Unknown method\n")
         return img
+    # reduce image noise such as salt and pepper noise
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.remove_noise(img,method=ipaddr.KUWAHARA , value=5)
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
-    def resize(image, method=INTER_LINEAR):
-        img = cv2.resize(image, __class__.SHAPE, interpolation=method)
+    def resize(image, shape=SHAPE, method=INTER_LINEAR):
+        img = cv2.resize(image, shape, interpolation=method)
         return img
-
-    def get_plate(image):
-        img, contours, hierarchy = cv2.findContours(image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
-        all_plate = []
-        for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
-            if hier[3] == -1:
-                rect = cv2.minAreaRect(cnt)
-                box = cv2.boxPoints(rect)
-                box = np.int0(box)
-                hierach = hier
-                index = 0
-                while hierach[2] != -1:
-                    index = hierach[2]
-                    hierach = hierarchy[0, index]
-                word_rect = cv2.minAreaRect(contours[index])
-                word_box = cv2.boxPoints(word_rect)
-                word_box = np.int0(word_box)
-                all_plate.append(Plate(box, word_box))
-        return all_plate
+    # change image size
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.resize(img,(28,28) )
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
     def capture(cam, size=SHAPE, mode=GRAY_SCALE, config=None):
         ret, image = cam.read()
@@ -130,69 +132,117 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             image = cv2.cvtColor(image, mode, config)
         image = cv2.resize(image, size)
         return image
+    # change image size
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       camera = cv2.videoCapture(0)
+       img = ipaddr.capture( camera)
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
     def translate(image, value, config=None):
         matrix = np.float32([[1, 0, value[0]], [0, 1, value[1]]])
         if config is None:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=__class__.SHAPE)
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape)
         elif config[1] == __class__.BORDER_CONSTANT:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=__class__.SHAPE, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
                                  borderMode=config[1], borderValue=config[2])
         else:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=__class__.SHAPE, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
                                  borderMode=config[1])
         return img
+    # translate image (move to the left right or whatever by value)
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.translate(img,(1,1))
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
     def blur(image, method=AVERAGING, value=5):
         if method == __class__.MEDIAN:
             img = cv2.medianBlur(image, value)
         elif method == __class__.AVERAGING:
-            averaging_kernel = np.ones(value, value) / pow(value, 2)
+            averaging_kernel = np.ones([value, value], dtype=np.float32) / pow(value, 2)
             img = cv2.filter2D(image, -1, averaging_kernel)
         elif method == __class__.GAUSSIAN:
-            img = cv2.GaussianBlur(image, value, 0)
+            img = cv2.GaussianBlur(image, (value, value), 0)
         elif method == __class__.BILATERAL:
             img = cv2.bilateralFilter(image, value[0], value[1], value[2])
         else:
             sys.exit("Unknown method\n")
         return img
+    # blur image with three method
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.blur(img,ipaddr.AVERAGING,3)
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
-    def morph(image, mode=DILATE, value=[3,3]):
+    def morph(image, mode=DILATE, value=[3, 3]):
         matrix = np.ones((value[0], value[1]), np.float32)
         img = cv2.morphologyEx(image, mode, matrix)
         return img
+    # morph image acording to mode and value use to construct kernel
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
     def remove_perspective(image, region, shape):
-        pts1 = region
-        pts2 = np.float32([0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]])
+        print([region[3], region[1], region[2], region[0]])
+        pts1 = np.float32([region[2], region[3], region[1], region[0]])
+        print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
+        pts2 = np.float32([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         img = cv2.warpPerspective(image, matrix, shape)
         return img
+    # morph image acording to mode and value use to construct kernel
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
     def rotation(image, center_of_rotation, angle):
         matrix = cv2.getRotationMatrix2D((center_of_rotation[0], center_of_rotation[1]), angle, 1)
-        #print(matrix)
-        img = cv2.warpAffine(image, matrix, __class__.CREATE_SHAPE, borderMode=__class__.BORDER_CONSTANT, borderValue=255)
+        # print(matrix)
+        # print(image.shape)
+        img = cv2.warpAffine(image, matrix, (image.shape[1],image.shape[0]), borderMode=__class__.BORDER_CONSTANT,
+                             borderValue=255)
+        # print(img.shape)
         return img
+    # rotate image according to center of rotation and angle
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.rotation(img,(img.shape[1]/2,img.shape[2]/2),[15,15])
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
 
     def font_to_image(font, size=CREATE_SHAPE, index=0, string="0"):
+        # Create Plate from font and word
         # Example
         # from IP_ADDR import Image_Processing_And_Do_something_to_make_Dataset_be_Ready as ipaddr
         # image = ipaddr.font_to_image("angsana.ttc", 10, 0, "หนึ่ง")
         # cv2.imshow("one", image)
         # cv2.waitKey(0)
 
-        Text_Font = ImageFont.truetype(font, size, index)
+        Text_Font = ImageFont.truetype(font, size, index, encoding="unic")
         w, h = Text_Font.getsize(string)
         img = Image.new("L", __class__.CREATE_SHAPE, color=255)
         image = ImageDraw.Draw(img)
         image.text(((__class__.CREATE_SHAPE[0] - w) / 2, (__class__.CREATE_SHAPE[1] - h) / 2), string, font=Text_Font,
                    fill="black")
         img = np.array(img)
-        cv2.rectangle(img, (60, 20), (__class__.CREATE_SHAPE[0] - 60, __class__.CREATE_SHAPE[1] - 20), 0, thickness=2)
+        cv2.rectangle(img, (60, 60), (__class__.CREATE_SHAPE[0] - 60, __class__.CREATE_SHAPE[1] - 60), 0, thickness=2)
         return img
 
-    def distorse( img, function=None, axis='x', alpha=1.0, beta=1.0):
+    def distorse(img, function=None, axis='x', alpha=1.0, beta=1.0):
         # can use with color or gray scale image
         # example code
 
@@ -226,7 +276,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     img[i, :] = np.roll(img[i, :], int(dist_func(i)))
         return img
 
-    def magnifly( image, percentage=100, shiftxy=[0, 0]):
+    def magnifly(image, percentage=100, shiftxy=[0, 0]):
         # can use with color or gray scale image
         # example code
         # img = IP.magnifly(img,150,shiftxy=[-30,-50])
@@ -241,18 +291,92 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         x_ = x * percentage // 100
         y_ = y * percentage // 100
 
-        img = cv2.resize(image, (x_, y_))
+        img = cv2.resize(image, (y_, x_))
         base = np.ones((x, y)) * 255
         base = Image.fromarray(base)
 
         img = Image.fromarray(img)
         base.paste(img, (-(x_ - x) // 2 + shiftxy[0], -(y_ - y) // 2 + shiftxy[1]))
+        fuck=np.array(base, dtype=np.uint8)
         # base.show('hello')
         return np.array(base, dtype=np.uint8)
 
     '''IP = Image_Processing_And_Do_something_to_make_Dataset_be_Ready()
-    img = cv2.imread('one.jpg',0)
-    img = IP.distorse(img,function='sine',axis='x',alpha=20,beta=2)
-    img = IP.distorse(img,function='sine',axis='y',alpha=20,beta=2)
-    cv2.imshow('img',img)
-    cv2.waitKey(0)'''
+        img = cv2.imread('one.jpg',0)
+        img = IP.distorse(img,function='sine',axis='x',alpha=20,beta=2)
+        img = IP.distorse(img,function='sine',axis='y',alpha=20,beta=2)
+        cv2.imshow('img',img)
+        cv2.waitKey(0)'''
+
+    class Plate():
+        #A class for plate
+        def __init__(self, image, cnt, word_cnt,extract_shape):
+            rect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+
+            word_rect = cv2.minAreaRect(word_cnt)
+            word_box = cv2.boxPoints(word_rect)
+            word_box = np.int0(word_box)
+
+            # print(word_rect)
+            M = cv2.moments(cnt)
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+
+            color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+            cv2.drawContours(color, [box], 0, (0, 0, 255), 2)
+            cv2.drawContours(color, [word_box], 0, (0, 255, 0), 2)
+
+            matrix = cv2.getRotationMatrix2D((cx, cy), rect[2], 1)
+            # self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.remove_perspective(image,
+            #                                                                                                   word_box,
+            #                                                                                                 (50, 25))
+            # print(matrix)
+            self.image = image
+            self.cnt = cnt
+            self.PlateBox = box
+            self.Original_Word_Size = word_rect[1]
+            self.WordBox = word_box
+            self.CenterPlate = [cx, cy]
+            self.angle = rect[2]
+            # print(word_rect)
+            self.word_angle = word_rect[2]
+            self.show = color
+            self.UnrotateImg = cv2.warpAffine(image, matrix, image.shape, borderMode=cv2.BORDER_CONSTANT,
+                                              borderValue=255)
+            if word_rect[1][0] > word_rect[1][1]:
+                y1 = int(word_rect[1][0] / 2) + int(word_rect[0][0])
+                y2 = int(word_rect[0][0]) - int(word_rect[1][0] / 2)
+                x1 = int(word_rect[1][0] / 2) + int(word_rect[0][1])
+                x2 = int(word_rect[0][1]) - int(word_rect[1][0] / 2)
+            else:
+                y1 = int(word_rect[1][1] / 2) + int(word_rect[0][0])
+                y2 = int(word_rect[0][0]) - int(word_rect[1][1] / 2)
+                x1 = int(word_rect[1][1] / 2) + int(word_rect[0][1])
+                x2 = int(word_rect[0][1]) - int(word_rect[1][1] / 2)
+            # print([x2,x1,y2,y1])
+            # print(cx,cy)
+            self.UnrotateWord = cv2.resize(self.UnrotateImg[x2:x1, y2:y1], extract_shape)
+
+    def get_plate(image,extract_shape):
+        image1 = 255 - image
+        image1 = __class__.morph(image1, __class__.DILATE, [15, 15])
+        img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+        all_plate = []
+        for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
+            if hier[3] == -1:
+                hierach = hier
+                index = 0
+                while hierach[2] != -1:
+                    index = hierach[2]
+                    hierach = hierarchy[0, index]
+                all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
+        return all_plate
+    # extract plate from image
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
