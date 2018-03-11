@@ -57,12 +57,15 @@ class TenzorCNN:
     def conv2d(self,x, W):
         return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
-    def CNN2(self,x,hidden_layer,kernel_size,pool_size,strides,image_size,keep_prob=1.0):
+    def CNN2(self,x,hidden_layer,kernel_size,pool_size,strides,image_size,keep_prob=1.0,input_drop=False):
         image_batch = x
         imgZ = image_size[0]*image_size[1]
         for i in range(0,len(hidden_layer)-1):
             if i == 0:
-                input_neurons = image_batch
+                if input_drop:
+                    input_neurons = tf.layers.dropout(inputs=image_batch, rate=keep_prob)
+                else:
+                    input_neurons = image_batch
             else:
                 input_neurons = self.pool[-1]
 
@@ -72,11 +75,9 @@ class TenzorCNN:
             with tf.name_scope("pool"+str(i)):
                 self.pool.append(tf.layers.max_pooling2d(inputs=self.conv_relu[-1], pool_size=pool_size[i], strides=strides[i]))
                 imgZ = imgZ//(pool_size[i][0]*pool_size[i][1])
-            print('imgZ',imgZ)
 
         with tf.name_scope("dense"):
             # The 'images' are now 7x7 (28 / 2 / 2), and we have 64 channels per image
-            print('imgzzz',imgZ)
             pool_flat = tf.reshape(self.pool[-1], [-1, imgZ *hidden_layer[-2]])
             dense = tf.layers.dense(inputs=pool_flat, units=hidden_layer[-1], activation=tf.nn.relu)
 
@@ -85,7 +86,7 @@ class TenzorCNN:
             dropout = tf.layers.dropout(
                 inputs=dense, rate=keep_prob)
         logits = tf.layers.dense(inputs=dropout, units=30)
-        return logits
+        return logits, self.conv_relu
 
     # create Convolutional Neural Network
     def CNN(self,x,hidden_layer,keep_prob=1.0,pool=True,stride=2):

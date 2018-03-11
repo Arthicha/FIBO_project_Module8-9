@@ -87,6 +87,7 @@ LEARNING_ALGORITHM = 'ADAM'
 # debugging tool
 TENSOR_BOARD = False
 SHOW_AUG = False
+CONV_PIC = True
 
 
 
@@ -101,14 +102,14 @@ if DATA is 'MNIST':
     imgSize = [28,28] # size of image
     N_CLASS = 10
 elif DATA is 'PROJECT':
-    imgSize = [60,30]
+    imgSize = [30,60]
     N_CLASS = 30
 
 
 CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[6,3],[6,3]]
+KERNEL_SIZE = [[3,6],[3,6]]
 POOL_SIZE = [[2,2],[3,3]]
 STRIDE_SIZE = [2,3]
 
@@ -149,7 +150,7 @@ elif DATA is 'PROJECT':
         for j in range(0,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:1000]
+            image = str(f.read()).split('\n')[:-1]
             f.close()
             delList = []
             for i in range(len(image)):
@@ -159,7 +160,7 @@ elif DATA is 'PROJECT':
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             obj[j] = 1
-            LabelTTT[s] += np.full((len(image),N_CLASS),obj).tolist()
+            LabelTTT[s] += np.full((len(image),N_CLASS),copy.deepcopy(obj)).tolist()
 
 if DATA is 'MNIST':
     testingSet  = [mnist.test.images,mnist.test.labels]
@@ -180,7 +181,6 @@ elif DATA is 'PROJECT':
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[0],LabelTTT[0]]
     validationSet = [TestTrainValidate[0],LabelTTT[0]]
-
 
 
 '''*************************************************
@@ -304,7 +304,7 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
 
         if (CNN_MODEL) and (not LATENT_MODEL):
             CNN = TenzorCNN()
-            y_pred = CNN.CNN2(x_image,CNN_HIDDEN_LAYER,KERNEL_SIZE,POOL_SIZE,STRIDE_SIZE,imgSize)
+            y_pred,WGTH = CNN.CNN2(x_image,CNN_HIDDEN_LAYER,KERNEL_SIZE,POOL_SIZE,STRIDE_SIZE,imgSize)
             '''pool = CNN.CNN(x_image,CNN_HIDDEN_LAYER,keep_prob=keep_prob,pool=True,stride=2)
             shape = pool.shape[1]
             shape = int(shape*shape*MULTI_COLUMN)
@@ -400,6 +400,8 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                         train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: KEEP_PROB})
                     else:
                         train_step_loss.run(feed_dict={x: batch[0], keep_prob: KEEP_PROB})
+
+
                 if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                     testing_accuracy = 0
                     for i in range(0,len(testingSet[1]),len(testingSet[1])//VALIDATE_SECTION):
@@ -448,6 +450,23 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                             f.close()
                             save_path = saver.save(sess, SAVE_PATH+str(filename)+'.ckpt')
                             print("Model saved in path: %s" % save_path)
+                            if CONV_PIC:
+                                if ((CNN_MODEL) and (not LATENT_MODEL)):
+
+                                    test_case = randint(0,len(testingSet[1]))
+                                    image = testingSet[0][test_case]
+                                    image = np.array(image)
+                                    image = np.reshape(image,(imgSize[0],imgSize[1]))*255
+                                    cv2.imwrite('originalImage.jpg',image)
+                                    for i in range(0,2):
+                                        WGHT = WGTH[i].eval(feed_dict={x: [testingSet[0][test_case]], y_: [testingSet[1][test_case]], keep_prob: 1.0})
+                                        for j in range(0,10):
+                                            z = np.array(WGHT[0][:,:,j])
+                                            zmn = z[...].min()
+                                            zmx = z[...].max()
+                                            Z = 255*(z-zmn)/(zmx-zmn)
+                                            cv2.imwrite('\layer'+str(i)+'\weigthImage'+str(j)+'.jpg',Z)
+
                 if (not CNN_MODEL) and (LATENT_MODEL):
                     fin_AE = True
 
@@ -460,48 +479,6 @@ def rand(min,max):
 
 def randint(min,max):
     return ran.randint(min,max)
-
-def randAE(size):
-    hidden_layer = []
-    layer = randint(3,5)
-    for i in range(layer):
-
-
-        if i == 0:
-            neuron = randint(2,10)
-        else:
-            neuron = randint(hidden_layer[-1],int(float(size)/(layer-i)))
-
-        hidden_layer.append(neuron)
-    front_layer = []
-    for i in range(1,layer):
-        front_layer = [hidden_layer[i]] + front_layer
-    hidden_layer = front_layer + hidden_layer
-    return [size]+hidden_layer+[size]
-
-def randNN():
-    hidden_layer = [1.0]
-    type = randint(0,3)
-    if type < 2:
-        hidden_layer = [1.0,1.0]
-    else:
-        layer = randint(1,10)
-        for i in range(layer):
-            hidden_layer.append(1.0)
-    return hidden_layer
-
-def randCNN(size,multy=8):
-    hidden_layer = [1]
-    layer = randint(2,10)
-    next = multy*math.sqrt(size)//layer
-    for i in range(layer):
-        if i == 0:
-            hidden_layer.append(int(next))
-        else:
-            prob = randint(7,13)/10.0
-            hidden_layer.append(int(hidden_layer[-1]+int(prob*next)))
-    return hidden_layer
-
 # hyper parameter
 
 
