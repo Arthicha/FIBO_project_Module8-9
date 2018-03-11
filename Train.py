@@ -70,25 +70,24 @@ model = 'CNN'
 CONTINUE = False
 
 # save and get path
-GETT_PATH = None#"D:\\2560\FRA361_Robot_Studio\Tensorflow\model"#None
-SAVE_PATH = "D:\\2560\FRA361_Robot_Studio\FIBO_project_Module8-9\model"
+GETT_PATH = None#"D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\model"
+SAVE_PATH = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\model"
 
 
 BATCH2PRINT = 20
 EPOCH = 2000
-AUGMENT = AUG_DTSB
+AUGMENT = AUG_NONE
 DIVIDEY = 1
 VALIDATE_SECTION = 100
 
-
-
+# learning algorithm 'ADAM' or 'GRAD'
+LEARNING_ALGORITHM = 'ADAM'
 
 
 # debugging tool
 TENSOR_BOARD = False
 SHOW_AUG = False
 
-reset = False
 
 
 
@@ -104,6 +103,7 @@ if DATA is 'MNIST':
 elif DATA is 'PROJECT':
     imgSize = [60,30]
     N_CLASS = 30
+
 
 CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
@@ -128,7 +128,12 @@ MULTI_COLUMN = 1
 *************************************************'''
 
 
-# Read dataset
+# Read dataset and divide them in to 3 group
+#       1. testing set 20 percent -> just test
+#       2. training set 60 percent -> train & learn
+#       3. validation set 20 percent -> hyper-parameter tuning and model selection
+# each group store in a list of [list of image ([img1,img2]), label (class)]
+
 TestTrainValidate = [[],[],[]]
 LabelTTT = [[],[],[]]
 if DATA is 'MNIST':
@@ -184,6 +189,7 @@ elif DATA is 'PROJECT':
 *                                                  *
 *************************************************'''
 
+# plot graph of relationship between accuracy and epoch then save it
 def accuracyPlot(y,graphName,xLabel,yLabel,saveAs):
     fig = plt.figure()
     ax = plt.subplot(111)
@@ -228,7 +234,7 @@ def distorse(img, function=None, axis='x', alpha=1.0, beta=1.0):
                     img[i, :] = np.roll(img[i, :], int(dist_func(i)))
         return img
 
-
+# list of image augmentation
 def augm(LoD,mod=0,valu=None):
 
     LoND = []
@@ -264,7 +270,7 @@ def augm(LoD,mod=0,valu=None):
 def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDEN_LAYER = [],NN_HIDDEN_LAYER = [],
          BATCH_SIZE = 16,BATCH2PRINT = 1000,EPOCH = 1,LEARNING_RATE = 0.01,KEEP_PROB = 0.9):
 
-    global CNN_MODEL,LATENT_MODEL,reset
+    global CNN_MODEL,LATENT_MODEL,LEARNING_ALGORITHM
     fin_AE = False
     if model is 'CNN':
         CNN_MODEL = 1
@@ -299,7 +305,6 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
         if (CNN_MODEL) and (not LATENT_MODEL):
             CNN = TenzorCNN()
             y_pred = CNN.CNN2(x_image,CNN_HIDDEN_LAYER,KERNEL_SIZE,POOL_SIZE,STRIDE_SIZE,imgSize)
-
             '''pool = CNN.CNN(x_image,CNN_HIDDEN_LAYER,keep_prob=keep_prob,pool=True,stride=2)
             shape = pool.shape[1]
             shape = int(shape*shape*MULTI_COLUMN)
@@ -322,10 +327,15 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                 if (not CNN_MODEL) and (LATENT_MODEL):
                     loss = tf.reduce_mean(tf.squared_difference(x, output))
         with tf.name_scope('gradient_descent_learning_algorithm'):
-                train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(cross_entropy)
+                if LEARNING_ALGORITHM is 'GRAD':
+                    train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(cross_entropy)
+                elif LEARNING_ALGORITHM is 'ADAM':
+                    train_step = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cross_entropy)
                 if (not CNN_MODEL) and (LATENT_MODEL):
-                    train_step_loss = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
-
+                    if LEARNING_ALGORITHM is 'GRAD':
+                        train_step_loss = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
+                    elif LEARNING_ALGORITHM is 'ADAM':
+                        train_step_loss = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss)
         with tf.name_scope('evaluation'):
             correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -340,22 +350,25 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
         saver = tf.train.Saver()
 
 
-
-    if reset:
-        pass
     with tf.Session() as sess:
         if TENSOR_BOARD:
             writer = tf.summary.FileWriter("output", sess.graph)
         sess.run(tf.global_variables_initializer())
         if GETT_PATH != None:
-            saver.restore(sess, GETT_PATH+'.ckpt')
-            print("Get model from path: %s" % GETT_PATH)
+            if (CNN_MODEL) and (not LATENT_MODEL):
+                filename = 'CNN'
+            elif fin_AE:
+                filename = 'AE'
+            saver.restore(sess, GETT_PATH+filename+'.ckpt')
+            print("Get model from path: %s" % GETT_PATH+filename+'.ckpt')
 
         if (CNN_MODEL) and (not LATENT_MODEL):
-            n_main = 1
+            n_main = 1 # CNN run only one time
         else:
-            n_main = 2
+            n_main = 2 # AE run two times for AE 1 and NN 1
         #len(mnist.train.labels)
+
+        # list that store accuracy
         epoch_acc = []
 
         for epoch in range(EPOCH):
@@ -364,9 +377,10 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                 for i in range(BATCH_SIZE,len(trainingSet[1])//DIVIDEY,BATCH_SIZE):
 
                     batch = [trainingSet[0][i-BATCH_SIZE:i],trainingSet[1][i-BATCH_SIZE:i]]
+
+                    # do augmentation
                     batch[0] = augm(batch[0],mod=aug,valu=value)
 
-                    #batch = mnist.train.next_batch(50)
                     if (i//BATCH_SIZE) % BATCH2PRINT == 0:
                         if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                             train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob: 1.0})
@@ -397,11 +411,6 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                         testing_accuracy += 1.00-loss.eval(feed_dict={x: testingSet[0][i:i+len(testingSet[1])//VALIDATE_SECTION],keep_prob: 1.0})
                     testing_accuracy = testing_accuracy/VALIDATE_SECTION
                 print('EPOCH %d: test accuracy %g' % (epoch,testing_accuracy))
-                '''if ((CNN_MODEL) and (not LATENT_MODEL)) and False:
-                    hidden_feature = deep_feature.eval(feed_dict={x: testingSet[0][0:10],keep_prob: 1.0})
-                    hidden_feature = np.array(hidden_feature)
-                    print(hidden_feature.shape)
-                    input('>>')'''
 
                 if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                     validation_accuracy = 0
@@ -497,7 +506,7 @@ def randCNN(size,multy=8):
 
 
 
-
+# best_accuracy is for comparing with previous models
 best_accuracy = 0.00
 print('STATUS: main program have started')
 try:
@@ -505,7 +514,9 @@ try:
         filename = 'CNN'
     elif model is 'LATENT':
         filename = 'AE'
+
     if CONTINUE:
+        # get configuration of previous model
         f = open('model_'+filename+'_config.txt','r')
         read = f.read()
         f.close()
@@ -527,6 +538,7 @@ if(1):
         HL = AE_HIDDEN_LAYER
         print('STATUS: ae_layer',AE_HIDDEN_LAYER)
     print('STATUS: nn_layer',NN_HIDDEN_LAYER)
+    # sart main program
     accuracy = main(best_accuracy, model = model,aug=AUGMENT,value=AUG_VALUE,GETT_PATH = GETT_PATH,SAVE_PATH=SAVE_PATH,MAIN_HIDDEN_LAYER = HL,NN_HIDDEN_LAYER = NN_HIDDEN_LAYER,
          BATCH_SIZE = BATCH_SIZE,BATCH2PRINT = BATCH2PRINT,EPOCH = EPOCH,LEARNING_RATE = LEARNING_RATE,KEEP_PROB = KEEP_PROB)
 
