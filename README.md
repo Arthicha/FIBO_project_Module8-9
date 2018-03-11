@@ -2,8 +2,8 @@ FIBO_project_Module8-9 Group 2 <br />
 institute of FIeld RObotics (FIBO) <br />
 King Mongkut University of Technology Thonburi (KMUTT) <br />
 
-Arthicha    Srisuchinnawong     zumoarthicha@gmail.com <br />
-Chaiyaporn  Boonyasathian <br />
+Arthicha &emsp; Srisuchinnawong     zumoarthicha@gmail.com <br />
+Chaiyaporn &emsp;  Boonyasathian <br />
 Jirapat     Thasingthong <br />
 Kaewkirati  Boukaew <br />
 Kitti       Pongaksorn <br />
