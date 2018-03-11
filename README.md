@@ -2,9 +2,8 @@
 ### Institute of FIeld RObotics (FIBO), King Mongkut University of Technology Thonburi (KMUTT)
 
 ## Group Member
-&lt;p&gt; Test &lt;p&gt;
-- Arthicha    Srisuchinnawong     zumoarthicha@gmail.com
-- Chaiyaporn  Boonyasathian
+- Arthicha    Srisuchinnawong   zumoarthicha@gmail.com
+- Chaiyaporn  Boonyasathian     chaiya45689@gmail.com
 - Jirapat     Thasingthong
 - Kaewkirati  Boukaew
 - Kitti       Pongaksorn
@@ -14,6 +13,8 @@
 - Phurin      Rangpong
 - Rath        Phutthitada
 - Sirin       Tangpoolcharoen
+
+
 
 
 
