@@ -1,0 +1,1 @@
+"D:\virtualenv\python35-64\Scripts\activate"
