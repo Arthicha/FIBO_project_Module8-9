@@ -421,7 +421,7 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                 if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                     validation_accuracy = 0
                     for i in range(0,len(validationSet[1]),len(validationSet[1])//10):
-                        validation_accuracy += accuracy.eval(feed_dict={x: validationSet[0][i:i+len(validationSet[1])//10], y_: validationSet[1][i:i+len(validationSet[1])//10], keep_prob: 1.0})
+                        validation_accuracy += accuracy.eval(feed_dict={x: validationSet[0][i:i+len(validationSet[1])//VALIDATE_SECTION], y_: validationSet[1][i:i+len(validationSet[1])//VALIDATE_SECTION], keep_prob: 1.0})
                     validation_accuracy = validation_accuracy/10.0
                     print('model accuracy:', validation_accuracy)
                     if (SAVE_PATH != None) and (validation_accuracy > best_accuracy):
