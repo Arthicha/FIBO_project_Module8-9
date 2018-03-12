@@ -172,6 +172,8 @@ elif DATA is 'PROJECT':
                 a,b = shuffly(TestTrainValidate[1],LabelTTT[1])
                 trainingSet = [np.array(a),np.array(b)]
                 print('STATIS: complete shuffle-ing')
+        del image
+        del object
 if DATA is 'MNIST':
     testingSet  = [mnist.test.images,mnist.test.labels]
     trainingSet = [mnist.train.images,mnist.train.labels]
@@ -185,7 +187,6 @@ elif DATA is 'PROJECT':
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[2],LabelTTT[2]]
     validationSet = [TestTrainValidate[2],LabelTTT[2]]
-input('>>')
 '''*************************************************
 *                                                  *
 *                     function                     *
