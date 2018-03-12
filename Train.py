@@ -161,22 +161,26 @@ elif DATA is 'PROJECT':
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             obj[j] = 1
             LabelTTT[s] += np.full((len(image),N_CLASS),copy.deepcopy(obj)).tolist()
-
+        if s == 1:
+            if DATA is 'PROJECT':
+                print('STATUS: shuffle-ing')
+                def shuffly(a,b):
+                    c = list(zip(a, b))
+                    random.shuffle(c)
+                    a, b = zip(*c)
+                    return a,b
+                a,b = shuffly(TestTrainValidate[1],LabelTTT[1])
+                trainingSet = [np.array(a),np.array(b)]
+                print('STATIS: complete shuffle-ing')
 if DATA is 'MNIST':
     testingSet  = [mnist.test.images,mnist.test.labels]
     trainingSet = [mnist.train.images,mnist.train.labels]
     validationSet = [mnist.validation.images,mnist.validation.labels]
 elif DATA is 'PROJECT':
-    print('STATUS: shuffle-ing')
-    def shuffly(a,b):
-        c = list(zip(a, b))
-        random.shuffle(c)
-        a, b = zip(*c)
-        return a,b
+
     #a,b = shuffly(TestTrainValidate[0],LabelTTT[0])
     #testingSet = [np.array(a),np.array(b)]
-    a,b = shuffly(TestTrainValidate[1],LabelTTT[1])
-    trainingSet = [np.array(a),np.array(b)]
+
     #a,b = shuffly(TestTrainValidate[2],LabelTTT[2])
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[2],LabelTTT[2]]
