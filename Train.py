@@ -389,15 +389,19 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                         if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                             train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob: 1.0})
                             validation_accuracy = 0
+                            n_sec = 0
                             for k in range(0,len(validationSet[1]),len(validationSet[1])//VALIDATE_SECTION):
                                 validation_accuracy += accuracy.eval(feed_dict={x: validationSet[0][k:k+len(validationSet[1])//VALIDATE_SECTION], y_: validationSet[1][k:k+len(validationSet[1])//VALIDATE_SECTION], keep_prob: 1.0})
-                            validation_accuracy = validation_accuracy/VALIDATE_SECTION
+                                n_sec += 1
+                            validation_accuracy = validation_accuracy/n_sec
                         else:
                             train_accuracy = 1.00-loss.eval(feed_dict={x: batch[0],keep_prob: 1.0})
                             validation_accuracy = 0
+                            n_sec = 0
                             for k in range(0,len(validationSet[1]),len(validationSet[1])//VALIDATE_SECTION):
                                 validation_accuracy += 1.00-loss.eval(feed_dict={x: validationSet[0][k:k+len(validationSet[1])//VALIDATE_SECTION],keep_prob: 1.0})
-                            validation_accuracy = validation_accuracy/VALIDATE_SECTION
+                                n_sec += 1
+                            validation_accuracy = validation_accuracy/n_sec
 
                         print('EPOCH %d: step %d, training accuracy %g, validation accuracy %g' % (epoch,i, train_accuracy,validation_accuracy))
                     if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
@@ -408,21 +412,27 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
 
                 if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                     testing_accuracy = 0
+                    n_sec = 0
                     for i in range(0,len(testingSet[1]),len(testingSet[1])//VALIDATE_SECTION):
                         testing_accuracy += accuracy.eval(feed_dict={x: testingSet[0][i:i+len(testingSet[1])//VALIDATE_SECTION], y_: testingSet[1][i:i+len(testingSet[1])//VALIDATE_SECTION], keep_prob: 1.0})
-                    testing_accuracy = testing_accuracy/VALIDATE_SECTION
+                        n_sec += 1
+                    testing_accuracy = testing_accuracy/n_sec
                 else:
                     testing_accuracy = 0
+                    n_sec = 0
                     for i in range(0,len(testingSet[1]),len(testingSet[1])//VALIDATE_SECTION):
                         testing_accuracy += 1.00-loss.eval(feed_dict={x: testingSet[0][i:i+len(testingSet[1])//VALIDATE_SECTION],keep_prob: 1.0})
-                    testing_accuracy = testing_accuracy/VALIDATE_SECTION
+                        n_sec += 1
+                    testing_accuracy = testing_accuracy/n_sec
                 print('EPOCH %d: test accuracy %g' % (epoch,testing_accuracy))
 
                 if ((CNN_MODEL) and (not LATENT_MODEL)) or (fin_AE):
                     validation_accuracy = 0
-                    for i in range(0,len(validationSet[1]),len(validationSet[1])//10):
+                    n_sec = 0
+                    for i in range(0,len(validationSet[1]),len(validationSet[1])//VALIDATE_SECTION):
                         validation_accuracy += accuracy.eval(feed_dict={x: validationSet[0][i:i+len(validationSet[1])//VALIDATE_SECTION], y_: validationSet[1][i:i+len(validationSet[1])//VALIDATE_SECTION], keep_prob: 1.0})
-                    validation_accuracy = validation_accuracy/10.0
+                        n_sec = 1
+                    validation_accuracy = validation_accuracy/n_sec
                     print('model accuracy:', validation_accuracy)
                     if (SAVE_PATH != None) and (validation_accuracy > best_accuracy):
                         save = False

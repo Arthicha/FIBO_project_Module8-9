@@ -193,9 +193,9 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.waitKey(0)'''
 
     def remove_perspective(image, region, shape):
-        print([region[3], region[1], region[2], region[0]])
+        #print([region[3], region[1], region[2], region[0]])
         pts1 = np.float32([region[2], region[3], region[1], region[0]])
-        print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
+        #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         pts2 = np.float32([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         img = cv2.warpPerspective(image, matrix, shape)
