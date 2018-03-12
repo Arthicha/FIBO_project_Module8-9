@@ -150,7 +150,7 @@ elif DATA is 'PROJECT':
         for j in range(0,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:100]
+            image = str(f.read()).split('\n')[:-1]
             f.close()
             delList = []
             for i in range(len(image)):
@@ -185,7 +185,7 @@ elif DATA is 'PROJECT':
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[2],LabelTTT[2]]
     validationSet = [TestTrainValidate[2],LabelTTT[2]]
-
+input('>>')
 '''*************************************************
 *                                                  *
 *                     function                     *
