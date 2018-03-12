@@ -145,7 +145,7 @@ elif DATA is 'PROJECT':
     listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
                        'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
                        'SevenTH','EightTH','NineTH']
-    for s in range(0,3):
+    for s in range(1,3):
         print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
             object = listOfClass[j]
@@ -175,12 +175,12 @@ elif DATA is 'PROJECT':
         return a,b
     #a,b = shuffly(TestTrainValidate[0],LabelTTT[0])
     #testingSet = [np.array(a),np.array(b)]
-    a,b = shuffly(TestTrainValidate[1],LabelTTT[1])
+    a,b = shuffly(TestTrainValidate[0],LabelTTT[0])
     trainingSet = [np.array(a),np.array(b)]
     #a,b = shuffly(TestTrainValidate[2],LabelTTT[2])
     #validationSet = [np.array(a),np.array(b)]
-    testingSet  = [TestTrainValidate[0],LabelTTT[0]]
-    validationSet = [TestTrainValidate[0],LabelTTT[0]]
+    testingSet  = [TestTrainValidate[1],LabelTTT[1]]
+    validationSet = [TestTrainValidate[1],LabelTTT[1]]
 
 
 '''*************************************************
