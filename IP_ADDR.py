@@ -217,7 +217,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         #pts1 = np.float32([region[1], region[0], region[3], region[2]])
         #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
-        img = cv2.warpPerspective(image, matrix, shape,flags=cv2.INTER_NEAREST,borderValue=255)
+        img = cv2.warpPerspective(image, matrix, shape,borderValue=255)
         return img
     # morph image acording to mode and value use to construct kernel
     # example

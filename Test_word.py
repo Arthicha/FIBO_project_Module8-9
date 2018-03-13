@@ -8,32 +8,34 @@ from IP_ADDR import Image_Processing_And_Do_something_to_make_Dataset_be_Ready a
 
 
 
-def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.001,0.5] ,minimumLength=0.1,plate_opening=7,char_closing=13,Siz=80.0):
+def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,minimumLength=0.1,plate_opening=3,char_closing=13,Siz=80.0):
 
     org = copy.deepcopy(img)
     x,y,c = org.shape
     areaTh=(perc_areaTh[0]*x*y,perc_areaTh[1]*x*y)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #ret, img = cv2.threshold(gray, 127, 255,  cv2.THRESH_OTSU)
-    img = IP.binarize(gray,IP.SAUVOLA_THRESHOLDING,sauvola_kernel)
-    img = np.array(img,dtype=np.uint8)
-    org = copy.deepcopy(img)
+    ret, img_o = cv2.threshold(gray, 127, 255,  cv2.THRESH_OTSU)
+    img_s = IP.binarize(gray,IP.SAUVOLA_THRESHOLDING,sauvola_kernel)
+    img_s = np.array(img_s,dtype=np.uint8)
+    img = cv2.bitwise_and(img_s,img_o)
+
 
     img_c = copy.deepcopy(img)
-    img_c = IP.morph(img_c, mode=IP.OPENING, value=[plate_opening, plate_opening])
-
+    img_c = IP.morph(img_c, mode=IP.ERODE, value=[plate_opening, plate_opening])
+    #org = copy.deepcopy(img_c)
 
     #cv2.imshow('frame',img_c)
     #cv2.waitKey(0)
     img_c, contours, hierarchy = cv2.findContours(img_c, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
     subImg = []
 
-
-    for cnt in contours:
+    for ic in range(0,len(contours)):
+        cnt = contours[ic]
+        hi = hierarchy[0][ic]
         epsilon = minimumLength*cv2.arcLength(cnt,True)
         approx = cv2.approxPolyDP(cnt,epsilon,True)
         area = cv2.contourArea(cnt)
-        if (len(approx) == 4) and (area > areaTh[0]) and (area < areaTh[1]):
+        if (len(approx) == 4) and (hi[1] != -1) and (area > areaTh[0]) and (area < areaTh[1]):
             img_p = IP.remove_perspective(img,approx,(int(Siz),int(Siz)),org_shape=(x,y))
             white = np.count_nonzero(img_p)/(Siz*Siz)
             if (white > 0.1):
