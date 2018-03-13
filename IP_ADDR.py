@@ -192,13 +192,32 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
-    def remove_perspective(image, region, shape):
+    def remove_perspective(image, region, shape,org_shape=None):
+        if org_shape == None:
+            org_shape = shape
         #print([region[3], region[1], region[2], region[0]])
-        pts1 = np.float32([region[2], region[3], region[1], region[0]])
+        #pts1 = np.float32([region[2], region[3], region[1], region[0]])
+        pts2 = np.float32([[0, 0], [org_shape[0], 0], [org_shape[0], org_shape[1]], [0, org_shape[1]]])
+
+        best_pts = []
+        min_cost = pow(shape[0]*shape[1],2)
+        for i in range(0,4):
+            rg = np.reshape(region,(-1,2)).tolist()
+            pts_1 = np.array(rg[-i:] + rg[:-i])
+            pts_2 = np.array(pts2)
+            cost = np.sum(np.abs(pts_1-pts_2))
+            if min_cost >= cost:
+                min_cost = cost
+                best_pts = pts_1
+        pts_1 = best_pts
+        pts2 = np.float32([[0, 0], [shape[0], 0], [shape[0], shape[1]], [0, shape[1]]])
+
+        pts1 = np.float32([[pts_1[0]],[pts_1[1]],[pts_1[2]],[pts_1[3]]])
+        #print(pts1.tolist())
+        #pts1 = np.float32([region[1], region[0], region[3], region[2]])
         #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
-        pts2 = np.float32([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
-        img = cv2.warpPerspective(image, matrix, shape)
+        img = cv2.warpPerspective(image, matrix, shape,flags=cv2.INTER_NEAREST,borderValue=255)
         return img
     # morph image acording to mode and value use to construct kernel
     # example
@@ -291,8 +310,8 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         x_ = x * percentage // 100
         y_ = y * percentage // 100
 
-        img = cv2.resize(image, (y_, x_))
-        base = np.ones((x, y)) * 255
+        img = cv2.resize(image, (y_, x_),interpolation=cv2.INTER_LANCZOS4)
+        base = np.ones((x, y)) * 255.0
         base = Image.fromarray(base)
 
         img = Image.fromarray(img)
