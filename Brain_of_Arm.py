@@ -441,6 +441,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 org,LoM = Get_Plate(frame)
                 LoM = np.array(LoM)
                 # Display the resulting frame
+                LoM = cv2.imread('file',0)
                 LoM = np.array(LoM)
                 LoC = copy.deepcopy(LoM)
                 LoC = LoC//255
