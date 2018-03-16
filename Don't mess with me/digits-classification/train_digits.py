@@ -106,6 +106,7 @@ if __name__ == '__main__':
     print('Loading digits from digits.png ... ')
     # Load data.
     digits, labels = load_digits('digits.png')
+    print(labels.shape)
 
     print('Shuffle data ... ')
     # Shuffle data
@@ -118,13 +119,15 @@ if __name__ == '__main__':
     
     print('Defining HoG parameters ...')
     # HoG feature descriptor
-    hog = get_hog();
+    hog = get_hog()
 
     print('Calculating HoG descriptor for every image ... ')
     hog_descriptors = []
     for img in digits_deskewed:
         hog_descriptors.append(hog.compute(img))
     hog_descriptors = np.squeeze(hog_descriptors)
+    print('haha')
+    print(hog_descriptors.shape)
 
     print('Spliting data into training (90%) and test set (10%)... ')
     train_n=int(0.9*len(hog_descriptors))
@@ -135,6 +138,8 @@ if __name__ == '__main__':
     
     print('Training SVM model ...')
     model = SVM()
+    print(hog_descriptors_train)
+    print(hog_descriptors_test.shape)
     model.train(hog_descriptors_train, labels_train)
 
     print('Saving SVM model ...')
