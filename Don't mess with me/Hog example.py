@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-
+# dumb ass
 def showPic(img):
     cv2.imshow("show",img)
     cv2.waitKey(0)
