@@ -86,7 +86,7 @@ class TenzorCNN:
             dropout = tf.layers.dropout(
                 inputs=dense, rate=keep_prob)
         logits = tf.layers.dense(inputs=dropout, units=30)
-        prob = tf.sigmoid(input=logits)
+        prob = tf.sigmoid(logits)
         return prob, self.conv_relu
 
     # create Convolutional Neural Network
