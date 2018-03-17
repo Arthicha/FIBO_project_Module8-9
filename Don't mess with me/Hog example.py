@@ -65,7 +65,7 @@ for files in dirs:
         data = director.read()
         director.close()
         data=data.split('\n')
-        print(len(data))
+        # print(len(data))
         data=data[:-1]
         num =0
         for x in data:
@@ -74,11 +74,12 @@ for files in dirs:
             img = img.reshape(-1,(60))
             img = img.astype(np.uint8)*255
             num += 1
-            print(num)
+            # print(num)
             img = deskew(img)
             trest =hog.compute(img,winStride=(20,20))
-            print(trest)
+            # print(trest)
             hog_descriptors.append(hog.compute(img,winStride=(10,10)))
         hog_descriptors = np.squeeze(hog_descriptors)
         print(hog_descriptors.shape)
+
 

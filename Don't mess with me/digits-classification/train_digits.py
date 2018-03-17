@@ -126,7 +126,6 @@ if __name__ == '__main__':
     for img in digits_deskewed:
         hog_descriptors.append(hog.compute(img))
     hog_descriptors = np.squeeze(hog_descriptors)
-    print('haha')
     print(hog_descriptors.shape)
 
     print('Spliting data into training (90%) and test set (10%)... ')
