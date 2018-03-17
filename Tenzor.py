@@ -250,10 +250,10 @@ class TenzorAE:
 
         if USE_RELU:
 
-            fr= self.fc_layer(self.auto_layer[-1], hidden_layers[-1], 28*28)
+            fr= self.fc_layer(self.auto_layer[-1], hidden_layers[-1],  hidden_layers[-1])
             fr = tf.nn.dropout(fr, keep_prob)
             out = tf.nn.relu(fr)
         else:
-            out= self.fc_layer(self.auto_layer[-1], hidden_layers[-1], 28*28)
+            out= self.fc_layer(self.auto_layer[-1], hidden_layers[-1],  hidden_layers[-1])
 
         return out,self.auto_layer[(len(hidden_layers)//2)-1]

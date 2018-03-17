@@ -274,7 +274,7 @@ def augm(LoD,mod=0,valu=None):
 def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDEN_LAYER = [],NN_HIDDEN_LAYER = [],
          BATCH_SIZE = 16,BATCH2PRINT = 1000,EPOCH = 1,LEARNING_RATE = 0.01,KEEP_PROB = 0.9):
 
-    global CNN_MODEL,LATENT_MODEL,LEARNING_ALGORITHM
+    global CNN_MODEL,LATENT_MODEL,LEARNING_ALGORITHM,imgSize
     fin_AE = False
     if model is 'CNN':
         CNN_MODEL = 1
@@ -317,8 +317,8 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
             '''
         elif (not CNN_MODEL) and (LATENT_MODEL):
             DAE = TenzorAE()
-            x_image = tf.reshape(x, [-1, imgSize[0]*imgSize[1]])
-            y_pred,latent = DAE.AE(x_image,hidden_layers=AE_HIDDEN_LAYER,keep_prob=keep_prob)
+            x_ae = tf.reshape(x, [-1, imgSize[0]*imgSize[1]])
+            y_pred,latent = DAE.AE(x_ae,hidden_layers=AE_HIDDEN_LAYER,keep_prob=keep_prob)
         else:
             sys.stderr.write('MODEL CONFUSE')
             sys.exit(-1)
