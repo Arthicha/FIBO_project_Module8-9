@@ -393,6 +393,32 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     hierach = hierarchy[0, index]
                 all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
         return all_plate
+
+
+    # example
+    # img = cv2.imread('ThreeEN.jpg',0)
+    # cv2.imshow('org',img)
+    # img = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.ztretch(img,axis='horizontal',percentage=0.6)
+    # cv2.imshow('result',img)
+    # cv2.waitKey(0)
+
+    def ztretch(image,percentage=1.0,axis='horizontal'):
+        y,x = image.shape
+        if axis == 'horizontal':
+
+            x_ = int(x*percentage)
+            y_ = y
+        elif axis == 'vertical':
+            x_ = x
+            y_ = int(y*percentage)
+        image = cv2.resize(image,(x_,y_))
+        if percentage >= 1.0:
+            image = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
+        else:
+            base = np.ones((y,x), np.uint8)*255
+            base[(y//2)-(y_//2):(y//2)+(y_//2),(x//2)-(x_//2):(x//2)+(x_//2)] = image
+        return base
+
     # extract plate from image
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
@@ -400,3 +426,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
+
+
+
+

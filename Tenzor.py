@@ -86,7 +86,8 @@ class TenzorCNN:
             dropout = tf.layers.dropout(
                 inputs=dense, rate=keep_prob)
         logits = tf.layers.dense(inputs=dropout, units=30)
-        return logits, self.conv_relu
+        prob = tf.sigmoid(logits)
+        return prob, self.conv_relu
 
     # create Convolutional Neural Network
     def CNN(self,x,hidden_layer,keep_prob=1.0,pool=True,stride=2):
@@ -249,10 +250,10 @@ class TenzorAE:
 
         if USE_RELU:
 
-            fr= self.fc_layer(self.auto_layer[-1], hidden_layers[-1], 28*28)
+            fr= self.fc_layer(self.auto_layer[-1], hidden_layers[-1],  hidden_layers[-1])
             fr = tf.nn.dropout(fr, keep_prob)
             out = tf.nn.relu(fr)
         else:
-            out= self.fc_layer(self.auto_layer[-1], hidden_layers[-1], 28*28)
+            out= self.fc_layer(self.auto_layer[-1], hidden_layers[-1],  hidden_layers[-1])
 
         return out,self.auto_layer[(len(hidden_layers)//2)-1]
