@@ -441,14 +441,15 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 org,LoM = Get_Plate(frame)
                 LoM = np.array(LoM)
                 # Display the resulting frame
-                LoM = cv2.imread('file',0)
+                ts = np.array(testingSet[0][200])*255
+                LoM = [np.reshape(ts,(30,60))]
                 LoM = np.array(LoM)
                 LoC = copy.deepcopy(LoM)
                 LoC = LoC//255
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
-
+                print(LoC)
                 LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
-
+                print(LoC)
                 for i in range(0,len(LoM)):
                     LoMi = cv2.resize(LoM[i],(300,150))
                     cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi,)
