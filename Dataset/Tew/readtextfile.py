@@ -13,8 +13,8 @@ from os import listdir
 #     img =img.astype(int)
 #     cv2.imshow("show",img)
 #     cv2.waitKey(0)
-
-f = open('C:\\Users\cha45\PycharmProjects\module8-9proj\Project8-9\CompressFork\dataset_ZeroTH_all_test.txt','r')
+#'C:\\Users\cha45\PycharmProjects\module8-9proj\Project8-9\CompressFork\dataset_ZeroTH_all_test.txt'
+f = open("C:\\Users\cha45\PycharmProjects\FIBO_project_Module8-9\Dataset\Tew\dataset_0.txt",'r')
 data = f.read()
 f.close()
 data=data.split('\n')
@@ -23,10 +23,11 @@ data=data[:-1]
 num =0
 for x in data:
     lisss=x.split(',')
+
     # print(x)
-    img = np.array(list(lisss[:-1]))
+    img = np.array(list(lisss[:]))
     # print(img)
-    img = img.reshape(-1,(40))
+    img = img.reshape(-1,(60))
     img = img.astype(np.uint8)*255
     # img=cv2.imread(img,cv2.IMREAD_GRAYSCALE)
     num += 1

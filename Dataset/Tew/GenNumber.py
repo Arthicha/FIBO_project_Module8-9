@@ -16,5 +16,5 @@ blur_method = [9,10, 11]
 magnify = [x for x in range(90, 115, 5)]
 distort = []
 
-GID("", shape=(60,30),rotate=RotateAngle, blur=blur_method, magnify=magnify, savepath=savePath, fontpath=Font_Path, imageshow=False,
+GID("", shape=(60,30),rotate=RotateAngle, blur=blur_method, magnify=magnify, savepath=savePath, fontpath=Font_Path, imageshow=True,
     allfont=True, word="NUM")
