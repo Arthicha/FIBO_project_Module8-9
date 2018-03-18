@@ -59,8 +59,11 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
             # extract word
             plate = ipaddr.get_plate(image, shape)
             extracted_word = plate[0].UnrotateWord
+            print(extracted_word.shape)
+            # extracted_word =cv2.cvtColor(extracted_word,cv2.BG)
+            extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING, value=25)
             if specialcase:
-                extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.OTSU_THRESHOLDING)
+                extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=25)
 
                 # ADAPTIVE_CONTRAST_THRESHOLDING,
                 # value=[5, 3])
@@ -82,16 +85,19 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                 # rotate image
 
                 rotate_image = ipaddr.rotation(extracted_word, (shape[0] / 2, shape[1] / 2), angle)
-                rotate_image = ipaddr.binarize(rotate_image, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
-                                             value=[3, 3])
-                ret,rotate_image = cv2.threshold(rotate_image, 127, 255, cv2.THRESH_BINARY)
+                rotate_image=255-rotate_image
+                cv2.imshow("rot", rotate_image)
+                rotate_image = ipaddr.binarize(rotate_image, method=ipaddr.NIBLACK_THRESHOLDING, value=[25,-0.5])
+                # rotate_image = ipaddr.binarize(rotate_image.astype(np.uint8), method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
+                #                              value=[3, 3])
+                # ret,rotate_image = cv2.threshold(rotate_image, 127, 255, cv2.THRESH_BINARY)
                 # construct file name and save
                 # savefilename = fontname + "_" + "None" + "_" + "Magnify100" + "_" + "None" + "_" + str(
                 #     angle) + "_" + "None" + "_" + "trans0l0""_" + filename[num] + ".jpg"
                 # cv2.imwrite(savepath + savefilename, rotate_image)
 
                 if imageshow and not skip:
-                    cv2.imshow("base", rotate_image)
+                    cv2.imshow("rot2", rotate_image)
                     key = cv2.waitKey(0)
                     if key == ord('s'):
                         skip = True
@@ -110,9 +116,11 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                         blurcode = "blur" + str(blurmedthod)
 
                     if not specialcase:
-                        blur_image = ipaddr.binarize(blur_image, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
-                                                     value=[3,3])
-                        ret,blur_image = cv2.threshold(blur_image, 127, 255, cv2.THRESH_BINARY)
+                        blur_image=255-blur_image
+                        blur_image = ipaddr.binarize(blur_image, method=ipaddr.NIBLACK_THRESHOLDING,value=[25,-0.5])
+                        # blur_image = ipaddr.binarize(blur_image, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
+                        #                              value=[3,3])
+                        # ret,blur_image = cv2.threshold(blur_image, 127, 255, cv2.THRESH_BINARY)
                     else:
                         blur_image = ipaddr.binarize(blur_image, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
                                                      value=[3, 3])
@@ -126,20 +134,22 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                     # cv2.imwrite(savepath + savefilename, blur_image)
 
                     if imageshow and not skip:
-                        cv2.imshow("base", blur_image)
+                        cv2.imshow("blur", blur_image)
                         key = cv2.waitKey(0)
                         if key == ord('s'):
                             skip = True
                     # iterate through magnify value
                     for magnifyratio in magnify:
                         magnify_image = ipaddr.magnifly(blur_image, magnifyratio)
-                        ret, magnify_image= cv2.threshold(magnify_image, 127, 255, cv2.THRESH_BINARY)
+                        magnify_image=255-magnify_image
+                        magnify_image = ipaddr.binarize(magnify_image, method=ipaddr.NIBLACK_THRESHOLDING, value=[25,-0.8])
+                        # ret, magnify_image= cv2.threshold(magnify_image, 127, 255, cv2.THRESH_BINARY)
                         # savefilename = fontname + "_" + str(blurcode) + "_" + "Magnify" + str(
                         #     magnifyratio) + "_" + "None" + "_" + str(
                         #     angle) + "_" + "None" + "_" + "trans0l0""_" + filename[num] + ".jpg"
                         # cv2.imwrite(savepath + savefilename, magnify_image)
                         if imageshow and not skip:
-                            cv2.imshow("base", magnify_image)
+                            cv2.imshow("magnify", magnify_image)
                             key = cv2.waitKey(0)
                             if key == ord('s'):
                                 skip = True

@@ -88,7 +88,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             img = Binarization.Binarization_LMM(image)
         else:
             sys.exit("Unknown method\n")
-        return img
+        return img.astype(np.uint8)
     # Binarize image into two value 255 or 0
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
