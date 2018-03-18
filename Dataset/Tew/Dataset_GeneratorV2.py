@@ -14,7 +14,8 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
     if allfont:
         font = [x for x in listdir(fontpath) if
                 ".ttf" in x or ".otf" in x or ".ttc" in x or ".TTF" in x or ".OTF" in x or ".TTC" in x]
-
+        font =font[:-1]
+        random.shuffle(font)
     wordlist = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "0", "1", "2", "3", "4",
                 "5", "6", "7", "8", "9", "ศูนย์ ", "หนึ่ง ", "สอง ", "สาม ", "สี่ ", "ห้า ", "หก ", "เจ็ด ", "แปด ",
                 "เก้า "]
@@ -59,18 +60,22 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
         stretch_quantify = stretch*2
         multiplicate = 1
 
+    # print(len(font))
+    # print([x for x in range(0,magnify_quantify) ])
+    # print([x for x in range(0, stretch_quantify//2)])
     piccount = len(font)+len(
-        font) * multiplicate * translate_quantify * rotate_quantify * blur_quantify * magnify_quantify * stretch_quantify
+        font) * multiplicate * translate_quantify * rotate_quantify * blur_quantify * magnify_quantify *( stretch_quantify+1)
     print("pic per num : " + str(piccount))
     for x in wordlist:
         write = ""
         skip = False
+        n=0
         for y in font:
             img = ipaddr.font_to_image(fontpath + y, fontsize, 0, x)
             plate = ipaddr.get_plate(img, shape)
             extracted_word = plate[0].UnrotateWord
             # extracted_word=255-extracted_word
-            # extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING)
+            extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=29)
             if imageshow and not skip:
                 cv2.imshow("original", extracted_word)
                 key = cv2.waitKey(0)
@@ -78,6 +83,7 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                     skip = True
             extracted_word_string = (extracted_word.ravel()) / 255
             extracted_word_string = np.array2string(extracted_word_string.astype(int),max_line_width=80000, separator=',')
+            n+=1
             write += extracted_word_string[1:-1] + "\n"
             for z in range(0, magnify_quantify):
                 if magnify == 0:
@@ -85,16 +91,20 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                 else:
                     magnify_img = ipaddr.magnifly(extracted_word,
                                                   percentage=random.randint(magnify_bound[1], magnify_bound[0]))
+                    magnify_img=255-magnify_img
+                    magnify_img = ipaddr.binarize(magnify_img, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,value=[15,-0.8])
+                    magnify_img=255-magnify_img
 
                     magnify_img_string = np.array2string(((magnify_img.ravel()) / 255).astype(int), max_line_width=80000,
                                                          separator=',')
+                    # n+=1
                     write += magnify_img_string[1:-1] + "\n"
                 if imageshow and not skip:
                     cv2.imshow("magnify", magnify_img)
                     key = cv2.waitKey(0)
                     if key == ord('s'):
                         skip = True
-                for k in range(0, stretch_quantify):
+                for k in range(0, stretch_quantify//2):
                         if stretch == 0:
                             stretch_img = magnify_img
                         else:
@@ -120,9 +130,25 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                                     skip = True
                             stretch_img_string = np.array2string(((stretch_img.ravel()) / 255).astype(int), max_line_width=80000,
                                                                  separator=',')
+                            # n+=2
                             write += stretch_img_string[1:-1] + "\n"
-        open("dataset" + "_" + filename[x] + '.txt', 'w').close()
-        file = open("dataset"+"_"+filename[x] + '.txt', 'a')
+            if n==len(font)*0.2:
+                print(n)
+                open("dataset" + "_" + filename[x]+"_"+"test" + '.txt', 'w').close()
+                file = open("dataset"+"_"+filename[x] +"_"+"test"+ '.txt', 'a')
+                file.write(write)
+                file.close()
+                write = ""
+            elif n == len(font)*0.4:
+                print(n)
+                open("dataset" + "_" + filename[x] + "_" + "validate" + '.txt', 'w').close()
+                file = open("dataset" + "_" + filename[x] + "_" + "validate" + '.txt', 'a')
+                file.write(write)
+                file.close()
+                write = ""
+        open("dataset" + "_" + filename[x] + "_" + "train" + '.txt', 'w').close()
+        file = open("dataset" + "_" + filename[x] + "_" + "train"+ '.txt', 'a')
         file.write(write)
         file.close()
         print(filename[x])
+        print(n)

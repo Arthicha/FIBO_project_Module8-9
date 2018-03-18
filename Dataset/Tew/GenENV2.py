@@ -17,6 +17,6 @@ GID("", shape=(60, 30), translate=None, rotate=0,
     rotation_bound=[45, -45], blur=None, magnify=4, magnify_bound=[111, 90], stretch=1,
     stretch_bound=[1.11, 0.9], distort=None, savepath="", fontpath=Font_Path,
     imageshow=False, detectblank=False,
-    allfont=True, word="NUM")
+    allfont=True, word="EN")
 # GID("", rotate=RotateAngle, blur=blur_method, magnify=magnify, savepath=savePath, fontpath=Font_Path, imageshow=False,
 #     allfont=True, word="NUM")
