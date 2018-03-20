@@ -412,12 +412,46 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             x_ = x
             y_ = int(y*percentage)
         image = cv2.resize(image,(x_,y_))
+        point = [(y_//2)-(y//2),(y_//2)+(y//2),(x_//2)-(x//2),(x_//2)+(x//2)]
+        conner = np.array([[point[0],point[2]],[point[0],point[3]],[point[1],point[3]],[point[1],point[3]]])
+        print('conner',conner)
+        image = __class__.remove_perspective(image,conner,(y,x),org_shape=(y,x))
+
+        '''print(x,y,x_,y_)
+
         if percentage >= 1.0:
-            image = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
+            base = np.ones((y,x), np.uint8)*255
+            image2 = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
+            add = [0,0]
+            if image2.shape[0] != 30:
+                if image2.shape[0] > 30:
+                    add[0] = -1
+                else:
+                    add[0] = 1
+            if image2.shape[1] != 60:
+                if image2.shape[1] > 60:
+                    add[1] = -1
+                else:
+                    add[1] = 1
+            base = image[(y_//2)-(y//2):(y_//2)+(y//2)+add[0],(x_//2)-(x//2):(x_//2)+(x//2)+add[1]]
+
         else:
             base = np.ones((y,x), np.uint8)*255
-            base[(y//2)-(y_//2):(y//2)+(y_//2),(x//2)-(x_//2):(x//2)+(x_//2)] = image
-            image = base
+            image2 = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
+            add = [0,0]
+            if image2.shape[0] != 30:
+                if image2.shape[0] > 30:
+                    add[0] = -1
+                else:
+                    add[0] = 1
+            if image2.shape[1] != 60:
+                if image2.shape[1] > 60:
+                    add[1] = -1
+                else:
+                    add[1] = 1
+            base[(y//2)-(y_//2):(y//2)+(y_//2)+add[0],(x//2)-(x_//2):(x//2)+(x_//2)+add[1]] = image
+
+        return base'''
         return image
 
     # extract plate from image
