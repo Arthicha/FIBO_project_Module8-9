@@ -184,6 +184,22 @@ def getWordSize(img_f):
     bottommost = np.array(cnt[cnt[:,:,1].argmax()][0])
     return np.linalg.norm(leftmost-rightmost),np.linalg.norm(topmost-bottommost)
 
+def Adapt_Image(image):
+    inv_image = 255-image
+    dilate = cv2.dilate(inv_image,np.ones((10,10)))
+    ret,cnt,hierarchy= cv2.findContours(dilate,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+    rect = cv2.minAreaRect(cnt[0])
+    if rect[1][0] > rect[1][1]:
+        y1 = int(rect[1][0] / 2) + int(rect[0][0])
+        y2 = int(rect[0][0]) - int(rect[1][0] / 2)
+        x1 = int(rect[1][0] / 2) + int(rect[0][1])
+        x2 = int(rect[0][1]) - int(rect[1][0] / 2)
+    else:
+        y1 = int(rect[1][1] / 2) + int(rect[0][0])
+        y2 = int(rect[0][0]) - int(rect[1][1] / 2)
+        x1 = int(rect[1][1] / 2) + int(rect[0][1])
+        x2 = int(rect[0][1]) - int(rect[1][1] / 2)
+    return cv2.resize(image[x2:x1, y2:y1], (30,60))
 
 def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.5),minimumLength=0.05,plate_opening=3,char_opening=13,Siz=60.0):
 
@@ -243,6 +259,7 @@ def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.
                     img_r[:,60-6:60-1] = 255
                     img_r[0:5,:] = 255
                     img_r[30-6:30-1,:] = 255
+                    img_r = Adapt_Image(img_r)
                     subImg.append(img_r)
                     '''chkO = checkOreantation(img_r)
                     diff[a] = [chkO,copy.deepcopy(img_r)]
