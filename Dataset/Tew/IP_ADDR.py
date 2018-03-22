@@ -416,8 +416,10 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             image = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
         else:
             base = np.ones((y,x), np.uint8)*255
-            base[(y//2)-(y_//2):(y//2)+(y_//2),(x//2)-(x_//2):(x//2)+(x_//2)] = image
-        return base
+            # print((y//2)-(y_//2),(y//2)+(y_//2),(x//2)-(x_//2),(x//2)+(x_//2))
+            base[(y//2)-(y_//2):(y//2)-(y_//2)+(y_),(x//2)-(x_//2):(x//2)-(x_//2)+x_] = image
+            image = base
+        return image
 
     # extract plate from image
     # example

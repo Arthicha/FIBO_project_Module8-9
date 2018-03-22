@@ -14,7 +14,7 @@ from os import listdir
 #     cv2.imshow("show",img)
 #     cv2.waitKey(0)
 #'C:\\Users\cha45\PycharmProjects\module8-9proj\Project8-9\CompressFork\dataset_ZeroTH_all_test.txt'
-f = open("C:\\Users\cha45\PycharmProjects\FIBO_project_Module8-9\Dataset\Tew\dataset_0.txt",'r')
+f = open("C:\\Users\cha45\PycharmProjects\FIBO_project_Module8-9\Dataset\Tew\dataset_ZeroTH_test.txt",'r')
 data = f.read()
 f.close()
 data=data.split('\n')
