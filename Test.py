@@ -47,19 +47,19 @@ def getWordSize(img_f):
 
 def Adapt_Image(image):
     inv_image = 255 - image
-    dilate = cv2.dilate(inv_image, np.ones((10, 10)))
+    dilate = cv2.dilate(inv_image, np.ones((5, 5)))
     ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     rect = cv2.minAreaRect(cnt[0])
-    if rect[1][0] > rect[1][1]:
-        y1 = int(rect[1][0] / 2) + int(rect[0][0])
-        y2 = int(rect[0][0]) - int(rect[1][0] / 2)
-        x1 = int(rect[1][0] / 2) + int(rect[0][1])
-        x2 = int(rect[0][1]) - int(rect[1][0] / 2)
-    else:
-        y1 = int(rect[1][1] / 2) + int(rect[0][0])
-        y2 = int(rect[0][0]) - int(rect[1][1] / 2)
-        x1 = int(rect[1][1] / 2) + int(rect[0][1])
-        x2 = int(rect[0][1]) - int(rect[1][1] / 2)
+    # if rect[1][0] > rect[1][1]:
+    y1 = int(rect[1][1] / 2) + int(rect[0][1])
+    y2 = int(rect[0][1]) - int(rect[1][1] / 2)
+    x1 = int(rect[1][0] / 2) + int(rect[0][0])
+    x2 = int(rect[0][0]) - int(rect[1][0] / 2)
+    # else:
+    #     y1 = int(rect[1][1] / 2) + int(rect[0][0])
+    #     y2 = int(rect[0][0]) - int(rect[1][1] / 2)
+    #     x1 = int(rect[1][1] / 2) + int(rect[0][1])
+    #     x2 = int(rect[0][1]) - int(rect[1][1] / 2)
     return cv2.resize(image[x2:x1, y2:y1], (30, 60))
 
 
