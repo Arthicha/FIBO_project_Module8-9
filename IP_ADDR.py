@@ -509,18 +509,20 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         inv_image = 255 - image
         dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
         ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-        if len(cnt) > 0:
-            rect = cv2.minAreaRect(cnt[0])
-            print(rect)
-            y1 = int(rect[1][0] / 2 + rect[0][0])
-            y2 = int(rect[0][0] - rect[1][0] / 2)
-            x1 = int(rect[1][1] / 2 + rect[0][1])
-            x2 = int(rect[0][1] - rect[1][1] / 2)
-            img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
-
-            ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
-            return img
-        else:
+        try:
+            if len(cnt) > 0:
+                rect = cv2.minAreaRect(cnt[0])
+                print(rect)
+                y1 = int(rect[1][0] / 2 + rect[0][0])
+                y2 = int(rect[0][0] - rect[1][0] / 2)
+                x1 = int(rect[1][1] / 2 + rect[0][1])
+                x2 = int(rect[0][1] - rect[1][1] / 2)
+                img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+                return img
+            else:
+                return image
+        except:
             return image
 
     def fuck(img,pix=50):
