@@ -16,7 +16,7 @@ distort = []
 GID("", shape=(60, 30), translate=None, rotate=0,
     rotation_bound=[45, -45], blur=None, magnify=0, magnify_bound=[111, 90], stretch=0,
     stretch_bound=[1.11, 0.9], distort=None,savepath="UnAugmented_dataset\\", fontpath=Font_Path,
-    imageshow=True, detectblank=False,
+    imageshow=False, detectblank=False,
     allfont=True, word="NUM",save=True)
 # GID("", rotate=RotateAngle, blur=blur_method, magnify=magnify, savepath=savePath, fontpath=Font_Path, imageshow=False,
 #     allfont=True, word="NUM")

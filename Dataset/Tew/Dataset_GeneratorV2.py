@@ -83,7 +83,7 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
             extracted_word = plate[0].UnrotateWord
             # extracted_word=255-extracted_word
             # extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING, value=29)
-            extracted_word = cv2.bitwise_and(ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=29),extracted_word)
+            extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=29)
             if imageshow and not skip:
                 cv2.imshow("original", extracted_word)
                 key = cv2.waitKey(0)

@@ -14,9 +14,9 @@ from os import listdir
 #     cv2.imshow("show",img)
 #     cv2.waitKey(0)
 #'C:\\Users\cha45\PycharmProjects\module8-9proj\Project8-9\CompressFork\dataset_ZeroTH_all_test.txt'
-filename_list =[   "0",  "1",  "2",
-                 "3",  "4",  "5",  "6",  "7", "8", "9","zero", "one", "two", "three", "four", "five",
-                 "six", "seven", "eight", "nine", "ZeroTH",
+filename_list =[ "zero", "one", "two", "three", "four", "five",
+                 "six", "seven", "eight", "nine",  "0",  "1",  "2",
+                 "3",  "4",  "5",  "6",  "7", "8", "9", "ZeroTH",
                  "OneTH",  "TwoTH", "ThreeTH", "FourTH", "FiveTH",
                  "SixTH",
                  "SevenTH", "EightTH", "NineTH"]
