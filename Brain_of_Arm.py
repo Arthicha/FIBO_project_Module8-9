@@ -81,8 +81,8 @@ model = 'CNN'
 CONTINUE = False
 
 # save and get path
-GETT_PATH = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\model"
-SAVE_PATH = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\model"
+GETT_PATH = "C:\\Users\cha45\PycharmProjects\FIBO_project_Module8-9\\model"
+SAVE_PATH = "C:\\Users\cha45\PycharmProjects\FIBO_project_Module8-9\\model"
 
 
 BATCH2PRINT = 20
@@ -184,6 +184,22 @@ def getWordSize(img_f):
     bottommost = np.array(cnt[cnt[:,:,1].argmax()][0])
     return np.linalg.norm(leftmost-rightmost),np.linalg.norm(topmost-bottommost)
 
+def Adapt_Image(image):
+    output_shape =(60,30) #
+    ''' (width,height) of output(return) picture'''
+    dilate_kernel_shape=(10,10)
+    '''2d (x,y) can adjust offset if too less can't extract'''
+
+    inv_image = 255 - image
+    dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+    ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    rect = cv2.minAreaRect(cnt[0])
+    print(rect)
+    y1 = int(rect[1][0] / 2 + rect[0][0])
+    y2 = int(rect[0][0] - rect[1][0] / 2)
+    x1 = int(rect[1][1] / 2 + rect[0][1])
+    x2 = int(rect[0][1] - rect[1][1] / 2)
+    return cv2.resize(image[x2:x1, y2:y1], output_shape)
 
 def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.5),minimumLength=0.05,plate_opening=3,char_opening=13,Siz=60.0):
 
@@ -297,7 +313,7 @@ elif DATA is 'PROJECT':
         print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
             object = listOfClass[j]
-            f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
+            f = open('Dataset\\Tew\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
             image = str(f.read()).split('\n')[:100]
             f.close()
             delList = []
@@ -470,7 +486,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi,)
                     cv2.moveWindow('output'+str(i),300*i,80)
                 cv2.imshow('original',org)
-                if cv2.waitKey(3) & 0xFF == ord('q'):
+                if cv2.waitKey(100) & 0xFF == ord('q'):
                     break
                 for i in range(0,len(LoM)):
                     cv2.destroyWindow('output_'+str(i)+'_'+str(LoC[i]))

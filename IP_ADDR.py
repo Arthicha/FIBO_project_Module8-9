@@ -294,6 +294,33 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         cv2.imshow('img',img)
         cv2.waitKey(0)'''
 
+    def Adapt_Image(image):
+        output_shape =(60,30) #
+        ''' (width,height) of picture'''
+        # cv2.imshow("image",image)
+        # cv2.waitKey(0)
+        dilate_kernel_shape=(10,10)
+        '''2d (x,y) can adjust offset if too less can't extract'''
+
+        inv_image = 255 - image
+        dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+        ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        try:
+            if len(cnt)>0:
+                rect = cv2.minAreaRect(cnt[0])
+                print(rect)
+                y1 = int(rect[1][0] / 2 + rect[0][0])
+                y2 = int(rect[0][0] - rect[1][0] / 2)
+                x1 = int(rect[1][1] / 2 + rect[0][1])
+                x2 = int(rect[0][1] - rect[1][1] / 2)
+                img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+                return img
+            else:
+                return image
+        except:
+            return image
+
     class Plate():
         #A class for plate
         def __init__(self, image, cnt, word_cnt,extract_shape):
@@ -344,6 +371,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             # print([x2,x1,y2,y1])
             # print(cx,cy)
             self.UnrotateWord = cv2.resize(self.UnrotateImg[x2:x1, y2:y1], extract_shape)
+            self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(self.UnrotateWord)
 
     def get_plate(image,extract_shape):
         image1 = 255 - image
@@ -500,28 +528,6 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
 
         return image
 
-    def Adapt_Image(image):
-        output_shape =(60,30) #
-        ''' (width,height) of picture'''
-        dilate_kernel_shape=(10,10)
-        '''2d (x,y) can adjust offset if too less can't extract'''
-
-        inv_image = 255 - image
-        dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
-        ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-        if len(cnt) > 0:
-            rect = cv2.minAreaRect(cnt[0])
-            print(rect)
-            y1 = int(rect[1][0] / 2 + rect[0][0])
-            y2 = int(rect[0][0] - rect[1][0] / 2)
-            x1 = int(rect[1][1] / 2 + rect[0][1])
-            x2 = int(rect[0][1] - rect[1][1] / 2)
-            img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
-
-            ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
-            return img
-        else:
-            return image
 
     def fuck(img,pix=50):
         img_m = __class__.morph(img,mode=__class__.OPENING,value=[9,9])
