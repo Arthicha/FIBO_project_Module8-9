@@ -192,11 +192,40 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     y2 = int(rect[0][1]) - int(rect[1][1] / 2)
                     x1 = int(rect[1][0] / 2) + int(rect[0][0])
                     x2 = int(rect[0][0]) - int(rect[1][0] / 2)
+                # print(x2, x1, y2, y1)
+                if y2<0 and y1-y2>40:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][0])
+                    y2 = int(rect[0][0]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][1])
+                    x2 = int(rect[0][1]) - int(rect[1][0] / 2)
+                if(x2>x1):
+                    a=x2
+                    x2=x1
+                    x1=a
+                if (y2>y1):
+                    a = y2
+                    y2 = y1
+                    y1 = a
+                if x1>30 and x2>0 :
+                    a= y1
+                    b= x2
+                    x2 = y2
+                    y2 = b
+                    y1= x1
+                    x1 = a
+                if x2<0:
+                    x2=0
+                if x1>30:
+                    x1=30
+
+                # print(x2,x1,y2,y1)
                 # y1 = int(rect[1][0] / 2 + rect[0][0])
                 # y2 = int(rect[0][0] - rect[1][0] / 2)
                 # x1 = int(rect[1][1] / 2 + rect[0][1])
                 # x2 = int(rect[0][1] - rect[1][1] / 2)
                 img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                # cv2.imshow("img",img)
+                # cv2.waitKey(0)
                 # ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
                 return img
             else:
