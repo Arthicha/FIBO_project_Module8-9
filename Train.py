@@ -65,7 +65,7 @@ AUG_VALUE = [20,3]
 DATA = 'PROJECT'
 
 # choose machine learning model 'LATENT' or 'CNN'
-model = 'LATENT'
+model = 'CNN'
 
 # continue previous model
 CONTINUE = False
@@ -88,8 +88,8 @@ LEARNING_ALGORITHM = 'ADAM'
 # debugging tool
 TENSOR_BOARD = False
 SHOW_AUG = False
-CONV_PIC = True
-PLOT_LATENT = True
+CONV_PIC = False
+PLOT_LATENT = False
 
 
 
@@ -151,8 +151,8 @@ elif DATA is 'PROJECT':
         print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
             object = listOfClass[j]
-            f = open('data0-9compress\\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:200]
+            f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
+            image = str(f.read()).split('\n')[:-1]
             f.close()
             delList = []
             for i in range(len(image)):
