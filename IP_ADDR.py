@@ -470,18 +470,14 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         # return the warped image
         return warped
 
-    def ztretch(image,percentage=1.0,axis='horizontal',multiply=1):
+    def ztretch(image,bord=0,axis='horizontal',multiply=1):
         y,x = image.shape
         bod = [0,0]
         if axis == 'horizontal':
 
-            x_ = int(x*percentage)
-            bod[1] = int(x//(2.0*percentage))
-            y_ = y
+            bod[1] = bord
         elif axis == 'vertical':
-            x_ = x
-            bod[0] = int(y//(2.0*percentage))
-            y_ = int(y*percentage)
+            bod[0] = bord
         #image = cv2.resize(image,(multiply*x,multiply*y))
         #point = np.array([(y_//2)-(y//2),(y_//2)+(y//2),(x_//2)-(x//2),(x_//2)+(x//2)])
         #point = point*multiply
@@ -491,21 +487,57 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         #print('conner',conner)
         #image = __class__.remove_perspective(image,conner,shape=(y,x),org_shape=(multiply*x,multiply*y))
         #four_point_transform(image,conner,size=(multiply*y,multiply*x),divider=multiply)
-
+        print('bood before',bod)
         #print(x,y,x_,y_)
         if bod[0] > y//2:
             bod[0] = y//2
-        if bod[1] > y//2:
-            bod[1] = y//2
+        if bod[1] > x//2:
+            bod[1] = x//2
+        print('region:' ,bod[0],y-bod[0]+1,bod[1],x-bod[1]+1)
         interest = image[bod[0]:y-bod[0]+1,bod[1]:x-bod[1]+1]
-        print('bood',bod)
-        print('inter',interest.shape)
-        image = cv2.resize(interest,(x,y))
+        #print('bood after',bod)
+        #print('inter',interest.shape)
 
-        ret,image = cv2.threshold(image,180,255,cv2.THRESH_BINARY)
         return image
 
+    def Adapt_Image(image):
+        output_shape =(60,30) #
+        ''' (width,height) of picture'''
+        dilate_kernel_shape=(10,10)
+        '''2d (x,y) can adjust offset if too less can't extract'''
 
+        inv_image = 255 - image
+        dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+        ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        if len(cnt) > 0:
+            rect = cv2.minAreaRect(cnt[0])
+            print(rect)
+            y1 = int(rect[1][0] / 2 + rect[0][0])
+            y2 = int(rect[0][0] - rect[1][0] / 2)
+            x1 = int(rect[1][1] / 2 + rect[0][1])
+            x2 = int(rect[0][1] - rect[1][1] / 2)
+            img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+
+            ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+            return img
+        else:
+            return image
+
+    def fuck(img,pix=50):
+        img_m = __class__.morph(img,mode=__class__.OPENING,value=[9,9])
+        sz  = [30-np.argmin(np.count_nonzero(img_m,axis=1)[3:-3]),60-np.argmin(np.count_nonzero(img_m,axis=0)[3:-3])]
+
+        print('size_x_y',sz)
+        ztr = [1.00,1.00]
+        if sz[0] > 3:
+            ztr[0] = (pix//2-sz[0])//2#(1.00/(sz[0]))*pix/2
+        if sz[1] > 3:
+            ztr[1] = (pix-sz[1])//2#(1.00/(sz[1]))*pix
+        img = __class__.ztretch(img,bord=ztr[1],axis='horizontal')
+        img = __class__.ztretch(img,bord=ztr[0],axis='vertical')
+        image = cv2.resize(img,(30,60))
+        ret,img = cv2.threshold(image,180,255,cv2.THRESH_BINARY)
+        return img
         #return image
 
 

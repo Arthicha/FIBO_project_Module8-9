@@ -184,23 +184,6 @@ def getWordSize(img_f):
     bottommost = np.array(cnt[cnt[:,:,1].argmax()][0])
     return np.linalg.norm(leftmost-rightmost),np.linalg.norm(topmost-bottommost)
 
-def Adapt_Image(image):
-    output_shape =(60,30) #
-    ''' (width,height) of picture'''
-    dilate_kernel_shape=(10,10)
-    '''2d (x,y) can adjust offset if too less can't extract'''
-
-    inv_image = 255 - image
-    dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
-    ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    rect = cv2.minAreaRect(cnt[0])
-    print(rect)
-    y1 = int(rect[1][0] / 2 + rect[0][0])
-    y2 = int(rect[0][0] - rect[1][0] / 2)
-    x1 = int(rect[1][1] / 2 + rect[0][1])
-    x2 = int(rect[0][1] - rect[1][1] / 2)
-    return cv2.resize(image[x2:x1, y2:y1], (60, 30))
-
 
 def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.5),minimumLength=0.05,plate_opening=3,char_opening=13,Siz=60.0):
 
@@ -273,10 +256,9 @@ def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.
                     img_r[:,60-6:60-1] = 255
                     img_r[0:5,:] = 255
                     img_r[30-6:30-1,:] = 255
-                    print(ztr)
-                    img_r = IP.ztretch(img_r,percentage=ztr[0],axis='horizontal')
-                    img_r = IP.ztretch(img_r,percentage=ztr[1],axis='vertical')
-                    Adapt_Image(img_r)
+                    img_r = IP.Adapt_Image(img_r)
+                    #img_r = IP.ztretch(img_r,percentage=ztr[0],axis='horizontal')
+                    #img_r = IP.ztretch(img_r,percentage=ztr[1],axis='vertical')
                     subImg.append(img_r)
                     '''chkO = checkOreantation(img_r)
                     diff[a] = [chkO,copy.deepcopy(img_r)]
