@@ -500,7 +500,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         interest = image[bod[0]:y-bod[0]+1,bod[1]:x-bod[1]+1]
         print('bood',bod)
         print('inter',interest.shape)
-        image = cv2.resize(interest,(x,y)) #comment
+        image = cv2.resize(interest,(x,y))
 
         ret,image = cv2.threshold(image,180,255,cv2.THRESH_BINARY)
         return image
