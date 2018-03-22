@@ -256,9 +256,9 @@ def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.
                     img_r[:,60-6:60-1] = 255
                     img_r[0:5,:] = 255
                     img_r[30-6:30-1,:] = 255
-                    print(ztr)
-                    img_r = IP.ztretch(img_r,percentage=ztr[0],axis='horizontal')
-                    img_r = IP.ztretch(img_r,percentage=ztr[1],axis='vertical')
+                    img_r = IP.Adapt_Image(img_r)
+                    #img_r = IP.ztretch(img_r,percentage=ztr[0],axis='horizontal')
+                    #img_r = IP.ztretch(img_r,percentage=ztr[1],axis='vertical')
                     subImg.append(img_r)
                     '''chkO = checkOreantation(img_r)
                     diff[a] = [chkO,copy.deepcopy(img_r)]
