@@ -6,6 +6,7 @@ from IP_ADDR import Image_Processing_And_Do_something_to_make_Dataset_be_Ready a
 import cv2
 import numpy as np
 import copy
+import os
 
 class Retinutella():
 
@@ -15,6 +16,8 @@ class Retinutella():
     cameraPort = 0
     cameraMode = 1
     cameraOreintation = 0
+
+    windows = []
 
 
     # camera mode
@@ -49,18 +52,28 @@ class Retinutella():
         listOfImage = self.Get_Plate(image)
         return listOfImage
 
+
     def close(self):
         del self.cam
         self.cam = None
 
 
 
+
     def show(self,image,frame=None,wait=None):
         if frame == None:
             frame = self.name
+
         cv2.imshow(frame,image)
+        if frame != self.name:
+            self.windows.append(frame)
         if wait != None:
             cv2.waitKey(wait)
+
+
+    def destroyWindows(self):
+        for window in self.windows:
+            cv2.destroyWindow(window)
 
 
     '''*************************************************
@@ -204,15 +217,56 @@ class Retinutella():
 
         return org,subImg
 
-
-cam1 = Retinutella('cam1',1,90,cameraMode=0)
-while(1):
-    img1,LoI = cam1.getListOfPlate()
-    cam1.show(img1,wait=None)
-    for i in range(0,len(LoI)):
-        if i != len(LoI)-1:
-            cam1.show(LoI[i],frame='image'+str(i))
+def saveImage():
+    amount = [0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,]
+    cam1 = Retinutella('cam1',1,90,cameraMode=0)
+    print('type class separate each image by space')
+    print('\t0-9 is for number 0-9')
+    print('\t10-19 is for word zero-nine')
+    print('\t20-29 is for word in thai')
+    print('\te for exit')
+    print('\tx for dont save that image')
+    print("example 11 x 2 23")
+    while(1):
+        img1,LoI = cam1.getListOfPlate()
+        print('type class separate each image by space')
+        cam1.show(img1,wait=None)
+        for i in range(0,len(LoI)):
+            if i != len(LoI)-1:
+                cam1.show(LoI[i],frame='image'+str(i))
+            else:
+                cam1.show(LoI[i],frame='image'+str(i),wait=0)
+        inputC = input('type >>')
+        if inputC == 'e':
+            break
+        inputC = inputC.split(' ')
+        typeError = False
+        if len(inputC) == len(LoI):
+            for C in inputC:
+                if (C not in [str(i) for i in range(0,30)]) and(C not in ['x','e']):
+                    typeError = True
+                    break
         else:
-            cam1.show(LoI[i],frame='image'+str(i),wait=10)
+            typeError = True
 
-cam1.close()
+        if typeError:
+            print('ERROR: input error')
+            continue
+
+
+        for i in range(0,len(inputC)):
+            if inputC[i] != 'x':
+                directory = 'testImage_'+str(inputC[i])
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+                directory += '\\'+str(amount[int(inputC[i])])+'.jpg'
+                cv2.imwrite(directory,LoI[i])
+                print('image saved at',directory)
+                amount[int(inputC[i])] += 1
+        cam1.destroyWindows()
+
+    cam1.close()
+
+saveImage()

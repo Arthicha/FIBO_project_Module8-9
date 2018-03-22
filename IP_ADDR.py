@@ -464,7 +464,6 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
 
         # compute the perspective transform matrix and then apply it
         M = cv2.getPerspectiveTransform(rect, dst)
-        print('size',maxWidth,maxHeight)
         warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight),borderValue=255)
 
         # return the warped image
@@ -487,13 +486,12 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         #print('conner',conner)
         #image = __class__.remove_perspective(image,conner,shape=(y,x),org_shape=(multiply*x,multiply*y))
         #four_point_transform(image,conner,size=(multiply*y,multiply*x),divider=multiply)
-        print('bood before',bod)
+
         #print(x,y,x_,y_)
         if bod[0] > y//2:
             bod[0] = y//2
         if bod[1] > x//2:
             bod[1] = x//2
-        print('region:' ,bod[0],y-bod[0]+1,bod[1],x-bod[1]+1)
         interest = image[bod[0]:y-bod[0]+1,bod[1]:x-bod[1]+1]
         #print('bood after',bod)
         #print('inter',interest.shape)
@@ -512,7 +510,6 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         try:
             if len(cnt) > 0:
                 rect = cv2.minAreaRect(cnt[0])
-                print(rect)
                 y1 = int(rect[1][0] / 2 + rect[0][0])
                 y2 = int(rect[0][0] - rect[1][0] / 2)
                 x1 = int(rect[1][1] / 2 + rect[0][1])
@@ -525,22 +522,6 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         except:
             return image
 
-    def fuck(img,pix=50):
-        img_m = __class__.morph(img,mode=__class__.OPENING,value=[9,9])
-        sz  = [30-np.argmin(np.count_nonzero(img_m,axis=1)[3:-3]),60-np.argmin(np.count_nonzero(img_m,axis=0)[3:-3])]
-
-        print('size_x_y',sz)
-        ztr = [1.00,1.00]
-        if sz[0] > 3:
-            ztr[0] = (pix//2-sz[0])//2#(1.00/(sz[0]))*pix/2
-        if sz[1] > 3:
-            ztr[1] = (pix-sz[1])//2#(1.00/(sz[1]))*pix
-        img = __class__.ztretch(img,bord=ztr[1],axis='horizontal')
-        img = __class__.ztretch(img,bord=ztr[0],axis='vertical')
-        image = cv2.resize(img,(30,60))
-        ret,img = cv2.threshold(image,180,255,cv2.THRESH_BINARY)
-        return img
-        #return image
 
     def zkeleton(img,multi=2,morph=15):
         img = 255-img
