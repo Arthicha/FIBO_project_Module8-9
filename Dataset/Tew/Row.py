@@ -27,6 +27,10 @@ for file in filelist:
 
     ''' find possible number of contour (charaacter) in 1 file'''
     possibility= set(list(map(lambda x:len(x),character)))
+    for i in possibility:
+        percentage_in_file = 0
+        ''''''
+        print(percentage_in_file)
     print(possibility)
     print(file)
     print('********************')

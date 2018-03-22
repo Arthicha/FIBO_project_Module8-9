@@ -159,6 +159,51 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
+    def Adapt_Image(image):
+        output_shape =(60,30) #
+        ''' (width,height) of picture'''
+        # cv2.imshow("image",image)
+        # cv2.waitKey(0)
+        dilate_kernel_shape=(10,10)
+        '''2d (x,y) can adjust offset if too less can't extract'''
+
+        inv_image = 255 - image
+        dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+        col = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
+        # cv2.imshow("dil",dilate)
+        # cv2.waitKey(0)
+        ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        cv2.drawContours(col,cnt,-1,[0,255,0])
+        # cv2.imshow("con",col)
+        # print(len(cnt))
+        # cv2.waitKey(0)
+        try:
+            if len(cnt)>0:
+                rect = cv2.minAreaRect(cnt[0])
+                # print(rect)
+                # print(rect)
+                if rect[1][0] > rect[1][1]:
+                    y1 = int(rect[1][0] / 2 + rect[0][0])
+                    y2 = int(rect[0][0] - rect[1][0] / 2)
+                    x1 = int(rect[1][1] / 2 + rect[0][1])
+                    x2 = int(rect[0][1] - rect[1][1] / 2)
+                else:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][1])
+                    y2 = int(rect[0][1]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][0])
+                    x2 = int(rect[0][0]) - int(rect[1][0] / 2)
+                # y1 = int(rect[1][0] / 2 + rect[0][0])
+                # y2 = int(rect[0][0] - rect[1][0] / 2)
+                # x1 = int(rect[1][1] / 2 + rect[0][1])
+                # x2 = int(rect[0][1] - rect[1][1] / 2)
+                img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                # ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+                return img
+            else:
+                return image
+        except:
+            return image
+
     def blur(image, method=AVERAGING, value=5):
         if method == __class__.MEDIAN:
             img = cv2.medianBlur(image, value)
@@ -347,7 +392,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
             cv2.drawContours(color, [box], 0, (0, 0, 255), 2)
             cv2.drawContours(color, [word_box], 0, (0, 255, 0), 2)
-
+            # cv2.imshow("color",color)
             matrix = cv2.getRotationMatrix2D((cx, cy), rect[2], 1)
             # self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.remove_perspective(image,
             #                                                                                                   word_box,
@@ -375,16 +420,30 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                 y2 = int(word_rect[0][0]) - int(word_rect[1][1] / 2)
                 x1 = int(word_rect[1][1] / 2) + int(word_rect[0][1])
                 x2 = int(word_rect[0][1]) - int(word_rect[1][1] / 2)
+            # y1 = int(word_rect[1][0] / 2 + word_rect[0][0])
+            # y2 = int(word_rect[0][0] - word_rect[1][0] / 2)
+            # x1 = int(word_rect[1][1] / 2 + word_rect[0][1])
+            # x2 = int(word_rect[0][1] - word_rect[1][1] / 2)
             # print([x2,x1,y2,y1])
             # print(cx,cy)
             self.UnrotateWord = cv2.resize(self.UnrotateImg[x2:x1, y2:y1], extract_shape)
+            # cv2.imshow("kkkkk",self.UnrotateWord)
+            # cv2.waitKey(100)
+            self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(
+                self.UnrotateWord)
+            # cv2.imshow("suk",self.UnrotateWord)
+            # cv2.waitKey(0)
 
     def get_plate(image,extract_shape):
+        org = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
         image1 = 255 - image
         image1 = __class__.morph(image1, __class__.DILATE, [15, 15])
         img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
         all_plate = []
+        cv2.drawContours(org,contours,-1,[255,0,0])
+        # cv2.imshow("jjjj",org)
         for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
+
             if hier[3] == -1:
                 hierach = hier
                 index = 0

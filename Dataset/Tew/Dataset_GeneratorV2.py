@@ -10,7 +10,7 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                         rotation_bound=[45, -45], blur=None, magnify=0, magnify_bound=[101, 90], stretch=0,
                         stretch_bound=[1.11, 0.9], distort=None, savepath="", fontpath="",
                         imageshow=False, detectblank=False,
-                        allfont=False, word="ALL"):
+                        allfont=False, word="ALL", save=True):
     if allfont:
         font = [x for x in listdir(fontpath) if
                 ".ttf" in x or ".otf" in x or ".ttc" in x or ".TTF" in x or ".OTF" in x or ".TTC" in x]
@@ -25,6 +25,11 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                 "หนึ่ง ": "OneTH", "สอง ": "TwoTH", "สาม ": "ThreeTH", "สี่ ": "FourTH", "ห้า ": "FiveTH",
                 "หก ": "SixTH",
                 "เจ็ด ": "SevenTH", "แปด ": "EightTH", "เก้า ": "NineTH"}
+
+    # print(list(range(stretch_bound[1],stretch_bound[0],0.05)))
+
+
+
 
     if word is "EN":
         wordlist = wordlist[0:10]
@@ -71,10 +76,13 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
         skip = False
         n=0
         for y in font:
+            print(y)
             img = ipaddr.font_to_image(fontpath + y, fontsize, 0, x)
+            # cv2.imshow("suck",img)
             plate = ipaddr.get_plate(img, shape)
             extracted_word = plate[0].UnrotateWord
             # extracted_word=255-extracted_word
+            # extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING, value=29)
             extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=29)
             if imageshow and not skip:
                 cv2.imshow("original", extracted_word)
@@ -97,7 +105,7 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
 
                     magnify_img_string = np.array2string(((magnify_img.ravel()) / 255).astype(int), max_line_width=80000,
                                                          separator=',')
-                    # n+=1
+                    n+=1
                     write += magnify_img_string[1:-1] + "\n"
                 if imageshow and not skip:
                     cv2.imshow("magnify", magnify_img)
@@ -130,25 +138,28 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                                     skip = True
                             stretch_img_string = np.array2string(((stretch_img.ravel()) / 255).astype(int), max_line_width=80000,
                                                                  separator=',')
-                            # n+=2
+                            n+=2
                             write += stretch_img_string[1:-1] + "\n"
             if n==len(font)*0.2:
                 print(n)
-                open("dataset" + "_" + filename[x]+"_"+"test" + '.txt', 'w').close()
-                file = open("dataset"+"_"+filename[x] +"_"+"test"+ '.txt', 'a')
-                file.write(write)
-                file.close()
-                write = ""
+                if save:
+                    open(savepath+"dataset" + "_" + filename[x]+"_"+"test" + '.txt', 'w').close()
+                    file = open(savepath+"dataset"+"_"+filename[x] +"_"+"test"+ '.txt', 'a')
+                    file.write(write)
+                    file.close()
+                    write = ""
             elif n == len(font)*0.4:
                 print(n)
-                open("dataset" + "_" + filename[x] + "_" + "validate" + '.txt', 'w').close()
-                file = open("dataset" + "_" + filename[x] + "_" + "validate" + '.txt', 'a')
-                file.write(write)
-                file.close()
-                write = ""
-        open("dataset" + "_" + filename[x] + "_" + "train" + '.txt', 'w').close()
-        file = open("dataset" + "_" + filename[x] + "_" + "train"+ '.txt', 'a')
-        file.write(write)
-        file.close()
+                if save:
+                    open(savepath+"dataset" + "_" + filename[x] + "_" + "validate" + '.txt', 'w').close()
+                    file = open(savepath+"dataset" + "_" + filename[x] + "_" + "validate" + '.txt', 'a')
+                    file.write(write)
+                    file.close()
+                    write = ""
+        if save:
+            open(savepath+"dataset" + "_" + filename[x] + "_" + "train" + '.txt', 'w').close()
+            file = open(savepath+"dataset" + "_" + filename[x] + "_" + "train"+ '.txt', 'a')
+            file.write(write)
+            file.close()
         print(filename[x])
         print(n)
