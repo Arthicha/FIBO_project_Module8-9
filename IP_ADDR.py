@@ -540,6 +540,26 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         return img
         #return image
 
+    def zkeleton(img,multi=2,morph=15):
+        img = 255-img
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+        done = False
+        size = np.size(img)/multi
+        skel = np.zeros(img.shape,np.uint8)
+        while( not done):
+            eroded = cv2.erode(img,element)
+            temp = cv2.dilate(eroded,element)
+            temp = cv2.subtract(img,temp)
+            skel = cv2.bitwise_or(skel,temp)
+            img = eroded.copy()
+
+            zeros = size - cv2.countNonZero(img)
+            if zeros==size:
+                done = True
+        skel = 255-skel
+        img = __class__.morph(skel,__class__.ERODE,[morph,morph])
+        return img
+
 
     # extract plate from image
     # example
