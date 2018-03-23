@@ -143,12 +143,12 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     def translate(image, value, config=None):
         matrix = np.float32([[1, 0, value[0]], [0, 1, value[1]]])
         if config is None:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape)
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]))
         elif config[1] == __class__.BORDER_CONSTANT:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1], borderValue=config[2])
         else:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1])
         return img
     # translate image (move to the left right or whatever by value)
@@ -192,11 +192,40 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     y2 = int(rect[0][1]) - int(rect[1][1] / 2)
                     x1 = int(rect[1][0] / 2) + int(rect[0][0])
                     x2 = int(rect[0][0]) - int(rect[1][0] / 2)
+                # print(x2, x1, y2, y1)
+                if y2<0 and y1-y2>40:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][0])
+                    y2 = int(rect[0][0]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][1])
+                    x2 = int(rect[0][1]) - int(rect[1][0] / 2)
+                if(x2>x1):
+                    a=x2
+                    x2=x1
+                    x1=a
+                if (y2>y1):
+                    a = y2
+                    y2 = y1
+                    y1 = a
+                if x1>30 and x2>0 :
+                    a= y1
+                    b= x2
+                    x2 = y2
+                    y2 = b
+                    y1= x1
+                    x1 = a
+                if x2<0:
+                    x2=0
+                if x1>30:
+                    x1=30
+
+                # print(x2,x1,y2,y1)
                 # y1 = int(rect[1][0] / 2 + rect[0][0])
                 # y2 = int(rect[0][0] - rect[1][0] / 2)
                 # x1 = int(rect[1][1] / 2 + rect[0][1])
                 # x2 = int(rect[0][1] - rect[1][1] / 2)
                 img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                # cv2.imshow("img",img)
+                # cv2.waitKey(0)
                 # ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
                 return img
             else:
@@ -488,6 +517,24 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
+    def zkeleton(img, multi=2, morph=15):
+        img = 255 - img
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        done = False
+        size = np.size(img) / multi
+        skel = np.zeros(img.shape, np.uint8)
+        while (not done):
+            eroded = cv2.erode(img, element)
+            temp = cv2.dilate(eroded, element)
+            temp = cv2.subtract(img, temp)
+            skel = cv2.bitwise_or(skel, temp)
+            img = eroded.copy()
 
+            zeros = size - cv2.countNonZero(img)
+            if zeros == size:
+                done = True
+        skel = 255 - skel
+        img = __class__.morph(skel, __class__.ERODE, [morph, morph])
+        return img
 
 

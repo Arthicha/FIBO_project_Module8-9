@@ -20,47 +20,47 @@ filename_list =[ "zero", "one", "two", "three", "four", "five",
                  "OneTH",  "TwoTH", "ThreeTH", "FourTH", "FiveTH",
                  "SixTH",
                  "SevenTH", "EightTH", "NineTH"]
-# for k in filename_list:
-#     for i in ["test","train","validate"]:
-#         f = open("UnAugmented_dataset\dataset_"+k+"_"+i+".txt",'r')
-#         data = f.read()
-#         f.close()
-#         data=data.split('\n')
-#         print(len(data))
-#         data=data[:-1]
-#         num =0
-#         for x in data:
-#             lisss=x.split(',')
+for k in filename_list:
+    for i in ["test","train","validate"]:
+        f = open("UnAugmented_dataset\dataset_"+k+"_"+i+".txt",'r')
+        data = f.read()
+        f.close()
+        data=data.split('\n')
+        print(len(data))
+        data=data[:-1]
+        num =0
+        for x in data:
+            lisss=x.split(',')
+
+            # print(x)
+            img = np.array(list(lisss[:]))
+            # print(img)
+            img = img.reshape(-1,(60))
+            img = img.astype(np.uint8)*255
+            # img=cv2.imread(img,cv2.IMREAD_GRAYSCALE)
+            num += 1
+            print(num)
+            cv2.imshow("show",img)
+            cv2.waitKey(0)
+
+# for i in ["test","train","validate"]:
+#     f = open("UnAugmented_dataset\dataset_"+"3"+"_"+i+".txt",'r')
+#     data = f.read()
+#     f.close()
+#     data=data.split('\n')
+#     print(len(data))
+#     data=data[:-1]
+#     num =0
+#     for x in data:
+#         lisss=x.split(',')
 #
-#             # print(x)
-#             img = np.array(list(lisss[:]))
-#             # print(img)
-#             img = img.reshape(-1,(60))
-#             img = img.astype(np.uint8)*255
-#             # img=cv2.imread(img,cv2.IMREAD_GRAYSCALE)
-#             num += 1
-#             print(num)
-#             cv2.imshow("show",img)
-#             cv2.waitKey(0)
-
-for i in ["test","train","validate"]:
-    f = open("UnAugmented_dataset\dataset_"+"3"+"_"+i+".txt",'r')
-    data = f.read()
-    f.close()
-    data=data.split('\n')
-    print(len(data))
-    data=data[:-1]
-    num =0
-    for x in data:
-        lisss=x.split(',')
-
-        # print(x)
-        img = np.array(list(lisss[:]))
-        # print(img)
-        img = img.reshape(-1,(60))
-        img = img.astype(np.uint8)*255
-        # img=cv2.imread(img,cv2.IMREAD_GRAYSCALE)
-        num += 1
-        print(num)
-        cv2.imshow("show",img)
-        cv2.waitKey(0)
+#         # print(x)
+#         img = np.array(list(lisss[:]))
+#         # print(img)
+#         img = img.reshape(-1,(60))
+#         img = img.astype(np.uint8)*255
+#         # img=cv2.imread(img,cv2.IMREAD_GRAYSCALE)
+#         num += 1
+#         print(num)
+#         cv2.imshow("show",img)
+#         cv2.waitKey(0)
