@@ -29,6 +29,8 @@ import sys
 import cv2
 import copy
 
+import time
+
 # my own library
 from Tenzor import TenzorCNN,TenzorNN,TenzorAE
 
@@ -216,21 +218,34 @@ def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.
 
             img_p = IP.remove_perspective(img,approx,(int(Siz),int(Siz)),org_shape=(x,y))
             white = np.count_nonzero(img_p)/(Siz*Siz)
+
             if (white > 0.1):
                 img_m = IP.morph(img_p,mode=IP.OPENING,value=[char_opening,char_opening])
 
                 aspect_ratio = aspectRatio(img_m)
-                sz = min(getWordSize(img_m))
+
+                sz = [60-np.count_nonzero(img_m,axis=1)[30],60-np.count_nonzero(img_m,axis=0)[30]]
+                ztr = [1.00,1.00]
+                if sz[0] > 3:
+                    ztr[0] = (1.00/(sz[0]))*50.0
+                if sz[1] > 3:
+                    ztr[1] = (1.00/(sz[1]))*25.0
+                ztr = [(1.00/(sz[0]+1.00))*50.0,(1.00/(sz[1]+1.00))*25.0]
                 if (aspect_ratio > numberOword[0]) and (aspect_ratio < numberOword[1]):
                     if aspect_ratio < 1.00:
-                        rotating_angle = [0,180]
+                        #rotating_angle = [0,180]
+                        pass
                     else:
-                        rotating_angle = [90,-90]
+                        #rotating_angle = [90,-90]
+                        pass
                 else:
                     if aspect_ratio < 1.00:
-                        rotating_angle = [90,-90]
+                        #rotating_angle = [90,-90]
+                        pass
                     else:
-                        rotating_angle = [0,180]
+                        #rotating_angle = [0,180]
+                        pass
+                rotating_angle = [0]
                 diff = [0,0]
 
 
@@ -243,6 +258,9 @@ def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.
                     img_r[:,60-6:60-1] = 255
                     img_r[0:5,:] = 255
                     img_r[30-6:30-1,:] = 255
+                    img_r = IP.Adapt_Image(img_r)
+                    #img_r = IP.ztretch(img_r,percentage=ztr[0],axis='horizontal')
+                    #img_r = IP.ztretch(img_r,percentage=ztr[1],axis='vertical')
                     subImg.append(img_r)
                     '''chkO = checkOreantation(img_r)
                     diff[a] = [chkO,copy.deepcopy(img_r)]
@@ -281,13 +299,14 @@ elif DATA is 'PROJECT':
         print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
             object = listOfClass[j]
-            f = open('data0-9compress\\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:100]
+            f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
+            image = str(f.read()).split('\n')[:-1]
             f.close()
             delList = []
             for i in range(len(image)):
                 image[i] = np.fromstring(image[i], dtype=float, sep=',')
                 image[i] = np.array(image[i])
+
                 image[i] = np.reshape(image[i],(60*30))
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -432,6 +451,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                         cv2.imwrite('D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\layer'+str(i)+'\\weigthImage'+str(j)+'.jpg',Z)
         elif PROGRAM is PROG_TEST:
             cap = cv2.VideoCapture(1)
+            image_indexy = 0
             while(True):
 
                 # Capture frame-by-frame
@@ -439,23 +459,28 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 org = copy.deepcopy(frame)
                 # Our operations on the frame come here
                 org,LoM = Get_Plate(frame)
-                LoM = np.array(LoM)
+
+                #LoM = np.array(LoM)
                 # Display the resulting frame
-                ts = np.array(testingSet[0][200])*255
-                LoM = [np.reshape(ts,(30,60))]
+                #ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
+                #image_indexy += 1
+                #LoM = [np.reshape(ts,(30,60))]
+                img = np.array(cv2.imread('0.jpg',0))
+                img = cv2.resize(img,(30,60))
+                #
+                LoM = [img]
                 LoM = np.array(LoM)
                 LoC = copy.deepcopy(LoM)
                 LoC = LoC//255
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
-                print(LoC)
+                print('prob',y_pred.eval(feed_dict={x: LoC, keep_prob: 1.0}))
                 LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
-                print(LoC)
                 for i in range(0,len(LoM)):
                     LoMi = cv2.resize(LoM[i],(300,150))
                     cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi,)
                     cv2.moveWindow('output'+str(i),300*i,80)
                 cv2.imshow('original',org)
-                if cv2.waitKey(3) & 0xFF == ord('q'):
+                if cv2.waitKey(300) & 0xFF == ord('q'):
                     break
                 for i in range(0,len(LoM)):
                     cv2.destroyWindow('output_'+str(i)+'_'+str(LoC[i]))

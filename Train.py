@@ -21,6 +21,7 @@ import random
 
 # display module
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 
 # system module
 import os
@@ -64,7 +65,7 @@ AUG_VALUE = [20,3]
 DATA = 'PROJECT'
 
 # choose machine learning model 'LATENT' or 'CNN'
-model = 'LATENT'
+model = 'CNN'
 
 # continue previous model
 CONTINUE = False
@@ -87,7 +88,8 @@ LEARNING_ALGORITHM = 'ADAM'
 # debugging tool
 TENSOR_BOARD = False
 SHOW_AUG = False
-CONV_PIC = True
+CONV_PIC = False
+PLOT_LATENT = False
 
 
 
@@ -108,7 +110,7 @@ elif DATA is 'PROJECT':
 
 CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
-AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,2,50,100,imgSize[0]*imgSize[1]]
+AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],1000,100,10,100,1000,imgSize[0]*imgSize[1]]
 KERNEL_SIZE = [[3,6],[3,6]]
 POOL_SIZE = [[2,2],[3,3]]
 STRIDE_SIZE = [2,3]
@@ -148,9 +150,10 @@ elif DATA is 'PROJECT':
     for s in range(1,3):
         print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
+
             object = listOfClass[j]
-            f = open('data0-9compress\\dataset_'+str(object)+'_all_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:200]
+            f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
+            image = str(f.read()).split('\n')[:-1]
             f.close()
             delList = []
             for i in range(len(image)):
@@ -187,6 +190,7 @@ elif DATA is 'PROJECT':
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[2],LabelTTT[2]]
     validationSet = [TestTrainValidate[2],LabelTTT[2]]
+print('training size:',len(trainingSet[1]))
 '''*************************************************
 *                                                  *
 *                     function                     *
@@ -342,7 +346,8 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
             with tf.name_scope('evaluation'):
                 correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y_, 1))
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
+        else:
+            accuracy = loss
     '''*************************************************
     *                                                  *
     *                  train model                     *
@@ -421,23 +426,21 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                     testing_accuracy = testing_accuracy/n_sec
                 print('EPOCH %d: test accuracy %g' % (epoch,testing_accuracy))
 
-                if ((CNN_MODEL) and (not LATENT_MODEL)):
+                if 1:
                     validation_accuracy = 0
                     n_sec = 0
                     for i in range(0,len(validationSet[1]),len(validationSet[1])//VALIDATE_SECTION):
                         validation_accuracy += accuracy.eval(feed_dict={x: validationSet[0][i:i+len(validationSet[1])//VALIDATE_SECTION], y_: validationSet[1][i:i+len(validationSet[1])//VALIDATE_SECTION], keep_prob: 1.0})
-                        n_sec = 1
+                        n_sec += 1
                     validation_accuracy = validation_accuracy/n_sec
                     print('model accuracy:', validation_accuracy)
-                    if (SAVE_PATH != None) and (validation_accuracy >= best_accuracy):
-                        save = False
+                    if (SAVE_PATH != None): #and (validation_accuracy >= best_accuracy):
+                        save = True
                         best_accuracy = validation_accuracy
                         if (CNN_MODEL) and (not LATENT_MODEL):
                             filename = 'CNN'
-                            save = True
-                        elif fin_AE:
+                        else:
                             filename = 'AE'
-                            save = True
                         if save:
                             epoch_acc.append(float(validation_accuracy))
                             accuracyPlot(epoch_acc,'accuracy of the model in each epoch','accuracy (prob)','time (epoch)','accuracy'+str(filename))
@@ -460,6 +463,29 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
                             f.close()
                             save_path = saver.save(sess, SAVE_PATH+str(filename)+'.ckpt')
                             print("Model saved in path: %s" % save_path)
+
+                            if PLOT_LATENT:
+                                if ((not CNN_MODEL) and (LATENT_MODEL)):
+                                    fig = plt.figure()
+                                    ls = p3.Axes3D(fig)
+
+                                    def get_cmap(n, name='hsv'):
+                                        return plt.cm.get_cmap(name, n)
+
+                                    cmap = get_cmap(30)
+                                    for i in range(0,len(trainingSet[1])//100):
+                                        latent_point = latent.eval(feed_dict={x: [trainingSet[0][i]],keep_prob: 1.0})
+                                        clas = trainingSet[1][i]
+                                        clas = np.argmax(np.array(clas))
+                                        ls.scatter(xs=[latent_point[0][0]],ys=[latent_point[0][1]],zs=[latent_point[0][2]],c=cmap(clas))
+                                    plt.title('')
+                                    plt.ylabel('dimension 1')
+                                    plt.xlabel('dimension 2')
+                                    ls.legend()
+                                    fig.savefig('D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\latentSpace.png')
+
+
+
                             if CONV_PIC:
                                 if ((CNN_MODEL) and (not LATENT_MODEL)):
 

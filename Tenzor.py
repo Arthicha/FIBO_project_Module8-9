@@ -71,10 +71,14 @@ class TenzorCNN:
 
             with tf.name_scope("conv"+str(i)):
                 self.conv_relu.append(tf.layers.conv2d(inputs=input_neurons, filters=hidden_layer[i], kernel_size=kernel_size[i],
-                                     padding='same', activation=tf.nn.relu))
+                                     padding='same', activation=tf.nn.leaky_relu))
             with tf.name_scope("pool"+str(i)):
-                self.pool.append(tf.layers.max_pooling2d(inputs=self.conv_relu[-1], pool_size=pool_size[i], strides=strides[i]))
-                imgZ = imgZ//(pool_size[i][0]*pool_size[i][1])
+                if pool_size[i] != None:
+                    self.pool.append(tf.layers.max_pooling2d(inputs=self.conv_relu[-1], pool_size=pool_size[i], strides=strides[i]))
+                    imgZ = imgZ//(pool_size[i][0]*pool_size[i][1])
+                else:
+                    self.pool.append(self.conv_relu[-1])
+
 
         with tf.name_scope("dense"):
             # The 'images' are now 7x7 (28 / 2 / 2), and we have 64 channels per image

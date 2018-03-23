@@ -88,7 +88,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             img = Binarization.Binarization_LMM(image)
         else:
             sys.exit("Unknown method\n")
-        return img
+        return img.astype(np.uint8)
     # Binarize image into two value 255 or 0
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
@@ -192,41 +192,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
-    def remove_perspective(image, region, shape,org_shape=None):
-        if org_shape == None:
-            org_shape = shape
-        #print([region[3], region[1], region[2], region[0]])
-        #pts1 = np.float32([region[2], region[3], region[1], region[0]])
-        pts2 = np.float32([[0, 0], [org_shape[0], 0], [org_shape[0], org_shape[1]], [0, org_shape[1]]])
 
-        best_pts = []
-        min_cost = pow(shape[0]*shape[1],2)
-        for i in range(0,4):
-            rg = np.reshape(region,(-1,2)).tolist()
-            pts_1 = np.array(rg[-i:] + rg[:-i])
-            pts_2 = np.array(pts2)
-            cost = np.sum(np.abs(pts_1-pts_2))
-            if min_cost >= cost:
-                min_cost = cost
-                best_pts = pts_1
-        pts_1 = best_pts
-        pts2 = np.float32([[0, 0], [shape[0], 0], [shape[0], shape[1]], [0, shape[1]]])
-
-        pts1 = np.float32([[pts_1[0]],[pts_1[1]],[pts_1[2]],[pts_1[3]]])
-        #print(pts1.tolist())
-        #pts1 = np.float32([region[1], region[0], region[3], region[2]])
-        #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
-        matrix = cv2.getPerspectiveTransform(pts1, pts2)
-        img = cv2.warpPerspective(image, matrix, shape,borderValue=255)
-        return img
-    # morph image acording to mode and value use to construct kernel
-    # region value is box containing data that u want to remove perspective like [()]
-    # example
-    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
-       img = cv2.imread('one.jpg',0)
-       img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
-       cv2.imshow('img',img)
-       cv2.waitKey(0)'''
 
     def rotation(image, center_of_rotation, angle):
         matrix = cv2.getRotationMatrix2D((center_of_rotation[0], center_of_rotation[1]), angle, 1)
@@ -384,16 +350,18 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         image1 = __class__.morph(image1, __class__.DILATE, [15, 15])
         img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
         all_plate = []
-        for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
-            if hier[3] == -1:
-                hierach = hier
-                index = 0
-                while hierach[2] != -1:
-                    index = hierach[2]
-                    hierach = hierarchy[0, index]
-                all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
-        return all_plate
-
+        try:
+            for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
+                if hier[3] == -1:
+                    hierach = hier
+                    index = 0
+                    while hierach[2] != -1:
+                        index = hierach[2]
+                        hierach = hierarchy[0, index]
+                    all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
+            return all_plate
+        except:
+            return None
 
     # example
     # img = cv2.imread('ThreeEN.jpg',0)
@@ -402,22 +370,179 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     # cv2.imshow('result',img)
     # cv2.waitKey(0)
 
-    def ztretch(image,percentage=1.0,axis='horizontal'):
+    def remove_perspective(image, region, shape,org_shape=None,auto_sort= True):
+        if org_shape == None:
+            org_shape = shape
+        #print([region[3], region[1], region[2], region[0]])
+        #pts1 = np.float32([region[2], region[3], region[1], region[0]])
+        pts2 = np.float32([[0, 0], [org_shape[0], 0], [org_shape[0], org_shape[1]], [0, org_shape[1]]])
+        if auto_sort:
+            best_pts = []
+            min_cost = pow(shape[0]*shape[1],2)
+            for i in range(0,4):
+                rg = np.reshape(region,(-1,2)).tolist()
+                pts_1 = np.array(rg[-i:] + rg[:-i])
+                pts_2 = np.array(pts2)
+                cost = np.sum(np.abs(pts_1-pts_2))
+                if min_cost >= cost:
+                    min_cost = cost
+                    best_pts = pts_1
+            pts_1 = best_pts
+            pts2 = np.float32([[0, 0], [shape[0], 0], [shape[0], shape[1]], [0, shape[1]]])
+
+            pts1 = np.float32([[pts_1[0]],[pts_1[1]],[pts_1[2]],[pts_1[3]]])
+        else:
+            pts2 = np.float32([[0, 0], [shape[0], 0], [shape[0], shape[1]], [0, shape[1]]])
+
+            pts1 = np.float32([[region[0]],[region[1]],[region[2]],[region[3]]])
+        #print(pts1.tolist())
+        #pts1 = np.float32([region[1], region[0], region[3], region[2]])
+        #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
+        #print('point from auto shuffling',pts1)
+        matrix = cv2.getPerspectiveTransform(pts1, pts2)
+        img = cv2.warpPerspective(image, matrix, shape,borderValue=255)
+        return img
+    # morph image acording to mode and value use to construct kernel
+    # region value is box containing data that u want to remove perspective like [()]
+    # example
+    '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
+       img = cv2.imread('one.jpg',0)
+       img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
+       cv2.imshow('img',img)
+       cv2.waitKey(0)'''
+
+    def four_point_transform(image, pts,size = (30,60),divider = 1):
+        # obtain a consistent order of the points and unpack them
+        # individually
+        W,H = np.array(size)//divider
+        def order_points(pts):
+            # initialzie a list of coordinates that will be ordered
+            # such that the first entry in the list is the top-left,
+            # the second entry is the top-right, the third is the
+            # bottom-right, and the fourth is the bottom-left
+            rect = np.zeros((4, 2), dtype = "float32")
+
+            # the top-left point will have the smallest sum, whereas
+            # the bottom-right point will have the largest sum
+            s = pts.sum(axis = 1)
+            rect[0] = pts[np.argmin(s)]
+            rect[2] = pts[np.argmax(s)]
+
+            # now, compute the difference between the points, the
+            # top-right point will have the smallest difference,
+            # whereas the bottom-left will have the largest difference
+            diff = np.diff(pts, axis = 1)
+            rect[1] = pts[np.argmin(diff)]
+            rect[3] = pts[np.argmax(diff)]
+
+            # return the ordered coordinates
+            return rect
+
+
+        rect = order_points(pts)
+
+        # compute the width of the new image, which will be the
+        # maximum distance between bottom-right and bottom-left
+        # x-coordiates or the top-right and top-left x-coordinates
+        maxWidth = W
+
+        # compute the height of the new image, which will be the
+        # maximum distance between the top-right and bottom-right
+        # y-coordinates or the top-left and bottom-left y-coordinates
+        maxHeight = H
+
+        # now that we have the dimensions of the new image, construct
+        # the set of destination points to obtain a "birds eye view",
+        # (i.e. top-down view) of the image, again specifying points
+        # in the top-left, top-right, bottom-right, and bottom-left
+        # order
+        dst = np.array([
+            [0, 0],
+            [maxWidth - 1, 0],
+            [maxWidth - 1, maxHeight - 1],
+            [0, maxHeight - 1]], dtype = "float32")
+
+        # compute the perspective transform matrix and then apply it
+        M = cv2.getPerspectiveTransform(rect, dst)
+        warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight),borderValue=255)
+
+        # return the warped image
+        return warped
+
+    def ztretch(image,bord=0,axis='horizontal',multiply=1):
         y,x = image.shape
+        bod = [0,0]
         if axis == 'horizontal':
 
-            x_ = int(x*percentage)
-            y_ = y
+            bod[1] = bord
         elif axis == 'vertical':
-            x_ = x
-            y_ = int(y*percentage)
-        image = cv2.resize(image,(x_,y_))
-        if percentage >= 1.0:
-            image = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
-        else:
-            base = np.ones((y,x), np.uint8)*255
-            base[(y//2)-(y_//2):(y//2)+(y_//2),(x//2)-(x_//2):(x//2)+(x_//2)] = image
-        return base
+            bod[0] = bord
+        #image = cv2.resize(image,(multiply*x,multiply*y))
+        #point = np.array([(y_//2)-(y//2),(y_//2)+(y//2),(x_//2)-(x//2),(x_//2)+(x//2)])
+        #point = point*multiply
+        #conner = np.array([[point[0],point[2]],[point[1],point[2]],[point[1],point[3]],[point[0],point[3]]])
+        #conner = np.array([[0,0],[x*multiply,0],[x*multiply,y*multiply],[0,y*multiply]])
+        #conner = np.array([[0,0],[-y,0],[-y,-x],[0,-x]])
+        #print('conner',conner)
+        #image = __class__.remove_perspective(image,conner,shape=(y,x),org_shape=(multiply*x,multiply*y))
+        #four_point_transform(image,conner,size=(multiply*y,multiply*x),divider=multiply)
+
+        #print(x,y,x_,y_)
+        if bod[0] > y//2:
+            bod[0] = y//2
+        if bod[1] > x//2:
+            bod[1] = x//2
+        interest = image[bod[0]:y-bod[0]+1,bod[1]:x-bod[1]+1]
+        #print('bood after',bod)
+        #print('inter',interest.shape)
+
+        return image
+
+    def Adapt_Image(image):
+        output_shape =(60,30) #
+        ''' (width,height) of picture'''
+        dilate_kernel_shape=(10,10)
+        '''2d (x,y) can adjust offset if too less can't extract'''
+
+        inv_image = 255 - image
+        dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+        ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        try:
+            if len(cnt) > 0:
+                rect = cv2.minAreaRect(cnt[0])
+                y1 = int(rect[1][0] / 2 + rect[0][0])
+                y2 = int(rect[0][0] - rect[1][0] / 2)
+                x1 = int(rect[1][1] / 2 + rect[0][1])
+                x2 = int(rect[0][1] - rect[1][1] / 2)
+                img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+                return img
+            else:
+                return image
+        except:
+            return image
+
+
+    def zkeleton(img,multi=2,morph=15):
+        img = 255-img
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
+        done = False
+        size = np.size(img)/multi
+        skel = np.zeros(img.shape,np.uint8)
+        while( not done):
+            eroded = cv2.erode(img,element)
+            temp = cv2.dilate(eroded,element)
+            temp = cv2.subtract(img,temp)
+            skel = cv2.bitwise_or(skel,temp)
+            img = eroded.copy()
+
+            zeros = size - cv2.countNonZero(img)
+            if zeros==size:
+                done = True
+        skel = 255-skel
+        img = __class__.morph(skel,__class__.ERODE,[morph,morph])
+        return img
+
 
     # extract plate from image
     # example

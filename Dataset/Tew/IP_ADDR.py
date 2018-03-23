@@ -1,5 +1,5 @@
 __author__ = ['Zumo', 'Tew', 'Wisa']
-__version__ = 1.10
+__version__ = 1.11
 # Fin all need function no comment though will add later
 #                                           BY TEW
 
@@ -88,7 +88,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             img = Binarization.Binarization_LMM(image)
         else:
             sys.exit("Unknown method\n")
-        return img
+        return img.astype(np.uint8)
     # Binarize image into two value 255 or 0
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
@@ -143,12 +143,12 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     def translate(image, value, config=None):
         matrix = np.float32([[1, 0, value[0]], [0, 1, value[1]]])
         if config is None:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape)
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]))
         elif config[1] == __class__.BORDER_CONSTANT:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1], borderValue=config[2])
         else:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1])
         return img
     # translate image (move to the left right or whatever by value)
@@ -158,6 +158,80 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        img = ipaddr.translate(img,(1,1))
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
+
+    def Adapt_Image(image):
+        output_shape =(60,30) #
+        ''' (width,height) of picture'''
+        # cv2.imshow("image",image)
+        # cv2.waitKey(0)
+        dilate_kernel_shape=(10,10)
+        '''2d (x,y) can adjust offset if too less can't extract'''
+
+        inv_image = 255 - image
+        dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+        col = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
+        # cv2.imshow("dil",dilate)
+        # cv2.waitKey(0)
+        ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        cv2.drawContours(col,cnt,-1,[0,255,0])
+        # cv2.imshow("con",col)
+        # print(len(cnt))
+        # cv2.waitKey(0)
+        try:
+            if len(cnt)>0:
+                rect = cv2.minAreaRect(cnt[0])
+                # print(rect)
+                # print(rect)
+                if rect[1][0] > rect[1][1]:
+                    y1 = int(rect[1][0] / 2 + rect[0][0])
+                    y2 = int(rect[0][0] - rect[1][0] / 2)
+                    x1 = int(rect[1][1] / 2 + rect[0][1])
+                    x2 = int(rect[0][1] - rect[1][1] / 2)
+                else:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][1])
+                    y2 = int(rect[0][1]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][0])
+                    x2 = int(rect[0][0]) - int(rect[1][0] / 2)
+                # print(x2, x1, y2, y1)
+                if y2<0 and y1-y2>40:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][0])
+                    y2 = int(rect[0][0]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][1])
+                    x2 = int(rect[0][1]) - int(rect[1][0] / 2)
+                if(x2>x1):
+                    a=x2
+                    x2=x1
+                    x1=a
+                if (y2>y1):
+                    a = y2
+                    y2 = y1
+                    y1 = a
+                if x1>30 and x2>0 :
+                    a= y1
+                    b= x2
+                    x2 = y2
+                    y2 = b
+                    y1= x1
+                    x1 = a
+                if x2<0:
+                    x2=0
+                if x1>30:
+                    x1=30
+
+                # print(x2,x1,y2,y1)
+                # y1 = int(rect[1][0] / 2 + rect[0][0])
+                # y2 = int(rect[0][0] - rect[1][0] / 2)
+                # x1 = int(rect[1][1] / 2 + rect[0][1])
+                # x2 = int(rect[0][1] - rect[1][1] / 2)
+                img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                # cv2.imshow("img",img)
+                # cv2.waitKey(0)
+                # ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+                return img
+            else:
+                return image
+        except:
+            return image
 
     def blur(image, method=AVERAGING, value=5):
         if method == __class__.MEDIAN:
@@ -192,15 +266,35 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
-    def remove_perspective(image, region, shape):
-        print([region[3], region[1], region[2], region[0]])
-        pts1 = np.float32([region[2], region[3], region[1], region[0]])
-        print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
-        pts2 = np.float32([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
+    def remove_perspective(image, region, shape,org_shape=None):
+        if org_shape == None:
+            org_shape = shape
+        #print([region[3], region[1], region[2], region[0]])
+        #pts1 = np.float32([region[2], region[3], region[1], region[0]])
+        pts2 = np.float32([[0, 0], [org_shape[0], 0], [org_shape[0], org_shape[1]], [0, org_shape[1]]])
+
+        best_pts = []
+        min_cost = pow(shape[0]*shape[1],2)
+        for i in range(0,4):
+            rg = np.reshape(region,(-1,2)).tolist()
+            pts_1 = np.array(rg[-i:] + rg[:-i])
+            pts_2 = np.array(pts2)
+            cost = np.sum(np.abs(pts_1-pts_2))
+            if min_cost >= cost:
+                min_cost = cost
+                best_pts = pts_1
+        pts_1 = best_pts
+        pts2 = np.float32([[0, 0], [shape[0], 0], [shape[0], shape[1]], [0, shape[1]]])
+
+        pts1 = np.float32([[pts_1[0]],[pts_1[1]],[pts_1[2]],[pts_1[3]]])
+        #print(pts1.tolist())
+        #pts1 = np.float32([region[1], region[0], region[3], region[2]])
+        #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
-        img = cv2.warpPerspective(image, matrix, shape)
+        img = cv2.warpPerspective(image, matrix, shape,borderValue=255)
         return img
     # morph image acording to mode and value use to construct kernel
+    # region value is box containing data that u want to remove perspective like [()]
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
        img = cv2.imread('one.jpg',0)
@@ -220,7 +314,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
        img = cv2.imread('one.jpg',0)
-       img = ipaddr.rotation(img,(img.shape[1]/2,img.shape[2]/2),[15,15])
+       img = ipaddr.rotation(img,(img.shape[1]/2,img.shape[2]/2),15)
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
@@ -291,8 +385,8 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         x_ = x * percentage // 100
         y_ = y * percentage // 100
 
-        img = cv2.resize(image, (y_, x_))
-        base = np.ones((x, y)) * 255
+        img = cv2.resize(image, (y_, x_),interpolation=cv2.INTER_LANCZOS4)
+        base = np.ones((x, y)) * 255.0
         base = Image.fromarray(base)
 
         img = Image.fromarray(img)
@@ -327,7 +421,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
             cv2.drawContours(color, [box], 0, (0, 0, 255), 2)
             cv2.drawContours(color, [word_box], 0, (0, 255, 0), 2)
-
+            # cv2.imshow("color",color)
             matrix = cv2.getRotationMatrix2D((cx, cy), rect[2], 1)
             # self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.remove_perspective(image,
             #                                                                                                   word_box,
@@ -355,16 +449,30 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                 y2 = int(word_rect[0][0]) - int(word_rect[1][1] / 2)
                 x1 = int(word_rect[1][1] / 2) + int(word_rect[0][1])
                 x2 = int(word_rect[0][1]) - int(word_rect[1][1] / 2)
+            # y1 = int(word_rect[1][0] / 2 + word_rect[0][0])
+            # y2 = int(word_rect[0][0] - word_rect[1][0] / 2)
+            # x1 = int(word_rect[1][1] / 2 + word_rect[0][1])
+            # x2 = int(word_rect[0][1] - word_rect[1][1] / 2)
             # print([x2,x1,y2,y1])
             # print(cx,cy)
             self.UnrotateWord = cv2.resize(self.UnrotateImg[x2:x1, y2:y1], extract_shape)
+            # cv2.imshow("kkkkk",self.UnrotateWord)
+            # cv2.waitKey(100)
+            self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(
+                self.UnrotateWord)
+            # cv2.imshow("suk",self.UnrotateWord)
+            # cv2.waitKey(0)
 
     def get_plate(image,extract_shape):
+        org = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
         image1 = 255 - image
         image1 = __class__.morph(image1, __class__.DILATE, [15, 15])
         img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
         all_plate = []
+        cv2.drawContours(org,contours,-1,[255,0,0])
+        # cv2.imshow("jjjj",org)
         for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
+
             if hier[3] == -1:
                 hierach = hier
                 index = 0
@@ -373,6 +481,34 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     hierach = hierarchy[0, index]
                 all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
         return all_plate
+
+
+    # example
+    # img = cv2.imread('ThreeEN.jpg',0)
+    # cv2.imshow('org',img)
+    # img = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.ztretch(img,axis='horizontal',percentage=0.6)
+    # cv2.imshow('result',img)
+    # cv2.waitKey(0)
+
+    def ztretch(image,percentage=1.0,axis='horizontal'):
+        y,x = image.shape
+        if axis == 'horizontal':
+
+            x_ = int(x*percentage)
+            y_ = y
+        elif axis == 'vertical':
+            x_ = x
+            y_ = int(y*percentage)
+        image = cv2.resize(image,(x_,y_))
+        if percentage >= 1.0:
+            image = image[(y_//2)-(y//2):(y_//2)+(y//2),(x_//2)-(x//2):(x_//2)+(x//2)]
+        else:
+            base = np.ones((y,x), np.uint8)*255
+            # print((y//2)-(y_//2),(y//2)+(y_//2),(x//2)-(x_//2),(x//2)+(x_//2))
+            base[(y//2)-(y_//2):(y//2)-(y_//2)+(y_),(x//2)-(x_//2):(x//2)-(x_//2)+x_] = image
+            image = base
+        return image
+
     # extract plate from image
     # example
     '''import Image_Processing_And_Do_something_to_make_Dataset_be_Ready() as ipaddr
@@ -380,3 +516,25 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        img = ipaddr.morph(img,ipaddr.DILATE,[15,15])
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
+
+    def zkeleton(img, multi=2, morph=15):
+        img = 255 - img
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        done = False
+        size = np.size(img) / multi
+        skel = np.zeros(img.shape, np.uint8)
+        while (not done):
+            eroded = cv2.erode(img, element)
+            temp = cv2.dilate(eroded, element)
+            temp = cv2.subtract(img, temp)
+            skel = cv2.bitwise_or(skel, temp)
+            img = eroded.copy()
+
+            zeros = size - cv2.countNonZero(img)
+            if zeros == size:
+                done = True
+        skel = 255 - skel
+        img = __class__.morph(skel, __class__.ERODE, [morph, morph])
+        return img
+
+
