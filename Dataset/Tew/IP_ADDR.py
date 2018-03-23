@@ -143,12 +143,12 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     def translate(image, value, config=None):
         matrix = np.float32([[1, 0, value[0]], [0, 1, value[1]]])
         if config is None:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape)
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]))
         elif config[1] == __class__.BORDER_CONSTANT:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1], borderValue=config[2])
         else:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1])
         return img
     # translate image (move to the left right or whatever by value)
@@ -517,6 +517,24 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
 
+    def zkeleton(img, multi=2, morph=15):
+        img = 255 - img
+        element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+        done = False
+        size = np.size(img) / multi
+        skel = np.zeros(img.shape, np.uint8)
+        while (not done):
+            eroded = cv2.erode(img, element)
+            temp = cv2.dilate(eroded, element)
+            temp = cv2.subtract(img, temp)
+            skel = cv2.bitwise_or(skel, temp)
+            img = eroded.copy()
 
+            zeros = size - cv2.countNonZero(img)
+            if zeros == size:
+                done = True
+        skel = 255 - skel
+        img = __class__.morph(skel, __class__.ERODE, [morph, morph])
+        return img
 
 
