@@ -150,6 +150,7 @@ elif DATA is 'PROJECT':
     for s in range(1,3):
         print('STATUS: process data',str(100.0*s/3.0))
         for j in range(0,N_CLASS):
+
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
             image = str(f.read()).split('\n')[:-1]
@@ -189,6 +190,7 @@ elif DATA is 'PROJECT':
     #validationSet = [np.array(a),np.array(b)]
     testingSet  = [TestTrainValidate[2],LabelTTT[2]]
     validationSet = [TestTrainValidate[2],LabelTTT[2]]
+print('training size:',len(trainingSet[1]))
 '''*************************************************
 *                                                  *
 *                     function                     *
