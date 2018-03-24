@@ -9,7 +9,7 @@ print(current_dir)
 filelist = [x for x in listdir(current_dir + "\\") if x[-4:] == ".txt"]
 print(filelist)
 for file in filelist:
-    f = open(current_dir + "\\" + file, 'r')
+    f = open(current_dir + "\\Augmented_dataset\\" + file, 'r')
     data = f.read()
     f.close()
     data = data.split('\n')[:-1]
@@ -28,7 +28,7 @@ for file in filelist:
     ''' using convolution to smooth image'''
     histogram_x = list(map(lambda x: np.convolve(x, np.array([ 1,1, 1, 1,1]),"same"), histogram_x))
     ''' using scipy find peak'''
-    histogram_x = list(map(lambda x:find_peaks_cwt(x , [3,4,5,6],max_distances=[4 for x in range(0,21)],gap_thresh=1),histogram_x))
+    histogram_x = list(map(lambda x:find_peaks_cwt(x , [4],max_distances=[4 for x in range(0,21)],gap_thresh=1),histogram_x))
     '''  possible number of peak in one file'''
     histogram_x = list(map(lambda x: x.shape,histogram_x))
     print(set(histogram_x))
