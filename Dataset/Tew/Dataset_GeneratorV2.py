@@ -113,36 +113,43 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                     key = cv2.waitKey(0)
                     if key == ord('s'):
                         skip = True
-                for c in morph_value:
-                    prep=255-magnify_img
-                    morph_image =ipaddr.morph(prep,c,value=[2,2])
-                    # morph_image = ipaddr.binarize(morph_image, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
-                    #                               value=[15, -0.8])
-                    morph_image=255-morph_image
-                    morph_image_string=np.array2string(((morph_image.ravel()) / 255).astype(int), max_line_width=80000,
-                                                         separator=',')
+
+                '''for m in skeleton:
+                    if m > 2:
+                        skel_img=ipaddr.zkeleton(magnify_img,1,m)
+                        # skel_img=ip
+                    else:
+                        skel_img = magnify_img
+                    skel_img_string =np.array2string(((skel_img.ravel()) / 255).astype(int), max_line_width=80000,
+                                                             separator=',')
                     # n += 1
-                    write += morph_image_string[1:-1] + "\n"
+                    write += skel_img_string[1:-1] + "\n"
                     if imageshow and not skip:
-                        cv2.imshow("morph", morph_image)
+                        cv2.imshow("skel", skel_img)
                         key = cv2.waitKey(0)
                         if key == ord('s'):
-                            skip = True
-                    for m in skeleton:
-                        skel_img=ipaddr.zkeleton(morph_image,1,m)
-                        # skel_img=ip
-                        skel_img_string =np.array2string(((skel_img.ravel()) / 255).astype(int), max_line_width=80000,
-                                                         separator=',')
+                            skip = True'''
+                if 1:
+                    skel_img = magnify_img
+
+                    for c in morph_value:
+                        prep=255-skel_img
+                        morph_image =ipaddr.morph(prep,c,value=[2,2])
+                        # morph_image = ipaddr.binarize(morph_image, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,
+                        #                               value=[15, -0.8])
+                        morph_image=255-morph_image
+                        morph_image_string=np.array2string(((morph_image.ravel()) / 255).astype(int), max_line_width=80000,
+                                                             separator=',')
                         # n += 1
-                        write += skel_img_string[1:-1] + "\n"
+                        write += morph_image_string[1:-1] + "\n"
                         if imageshow and not skip:
-                            cv2.imshow("skel", skel_img)
+                            cv2.imshow("morph", morph_image)
                             key = cv2.waitKey(0)
                             if key == ord('s'):
                                 skip = True
                         for g in range(2, -3, -2):
                             for h in range(2, -3, -2):
-                                tran_image = ipaddr.translate(skel_img, (g, h),
+                                tran_image = ipaddr.translate(morph_image, (g, h),
                                                               [cv2.INTER_LINEAR, ipaddr.BORDER_CONSTANT, 255])
                                 tran_image_string=np.array2string(((tran_image.ravel()) / 255).astype(int), max_line_width=80000,
                                                          separator=',')
