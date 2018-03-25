@@ -144,3 +144,4 @@ print(pred.shape)
 print('Generate confusion matrix...')
 confusionMat(test_lables, pred)
 
+#tu is dork haha
