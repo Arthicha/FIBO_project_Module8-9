@@ -84,7 +84,8 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
             extracted_word = plate[0].UnrotateWord
             # extracted_word=255-extracted_word
             # extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING, value=29)
-            extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=29)
+            ret, extracted_word = cv2.threshold(extracted_word, 200, 255,0)
+            # extracted_word = ipaddr.binarize(extracted_word, method=ipaddr.SAUVOLA_THRESHOLDING,value=29)
             if imageshow and not skip:
                 cv2.imshow("original", extracted_word)
                 key = cv2.waitKey(0)
@@ -100,9 +101,9 @@ def Generate_Image_Data(font, fontsize=32, shape=(40, 40), borderthickness=3, tr
                 else:
                     magnify_img = ipaddr.magnifly(extracted_word,
                                                   percentage=magnify_value[random.randint(0,len(magnify_value)-1)])
-                    magnify_img=255-magnify_img
-                    magnify_img = ipaddr.binarize(magnify_img, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,value=[15,-0.8])
-                    magnify_img=255-magnify_img
+                    # magnify_img=255-magnify_img
+                    # magnify_img = ipaddr.binarize(magnify_img, method=ipaddr.ADAPTIVE_CONTRAST_THRESHOLDING,value=[15,-0.8])
+                    # magnify_img=255-magnify_img
 
                     magnify_img_string = np.array2string(((magnify_img.ravel()) / 255).astype(int), max_line_width=80000,
                                                          separator=',')
