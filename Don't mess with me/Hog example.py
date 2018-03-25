@@ -25,7 +25,7 @@ def confusionMat(correct_Labels, Predicted_Labels):
 def showPic(img):
     cv2.imshow("show",img)
     cv2.waitKey(0)
-
+#chg
 
 def deskew(img):
     m = cv2.moments(img)
@@ -143,5 +143,4 @@ print('predicted....')
 print(pred.shape)
 print('Generate confusion matrix...')
 confusionMat(test_lables, pred)
-
 
