@@ -35,7 +35,7 @@ def deskew(img):
     # Calculate skew based on central momemts.
     skew = m['mu11']/m['mu02']
     # Calculate affine transform to correct skewness.
-    M = np.float32([[1, skew, -0.5*60*skew], [0, 1, 0]])
+    M = np.float32([[1, skew, -0.5**skew], [0, 1, 0]])
     # Apply affine transform
     img = cv2.warpAffine(img, M, (60, 30), flags=cv2.WARP_INVERSE_MAP | cv2.INTER_LINEAR)
     return img
@@ -76,7 +76,7 @@ hog_descriptors = []
 lables = []
 test_hog_descriptors = []
 test_lables = []
-path = 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\data0-9compress\\Extract\\'
+path = 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'
 dirs = os.listdir(path)
 
 #Import test and training data
@@ -84,8 +84,8 @@ for files in dirs:
     a = files.split('_')
     d = a[len(a)-1]
     if d == 'train.txt':
-        lab = a[len(a)-3]
-        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\data0-9compress\\Extract\\'+str(files),'r')
+        lab = a[len(a)-2]
+        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'+str(files),'r')
         data = director.read()
         director.close()
         data=data.split('\n')
@@ -93,17 +93,17 @@ for files in dirs:
         num =0
         for x in data:
             lisss=x.split(',')
-            img = np.array(list(lisss[:-1]))
+            img = np.array(list(lisss[:]))
             img = img.reshape(-1,(60))
             img = img.astype(np.uint8)*255
             num += 1
             img = deskew(img)
             hog_descriptors.append(hog.compute(img,winStride=(20,20)))
-            lables.append(lab)
+            lables.append(str(lab))
         print('appended train '+str(files))
     if d == 'test.txt':
-        labs = a[len(a)-3]
-        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\data0-9compress\\Extract\\'+str(files),'r')
+        labs = a[len(a)-2]
+        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'+str(files),'r')
         data = director.read()
         director.close()
         data=data.split('\n')
@@ -111,18 +111,20 @@ for files in dirs:
         num =0
         for x in data:
             lisss=x.split(',')
-            img = np.array(list(lisss[:-1]))
+            img = np.array(list(lisss[:]))
             img = img.reshape(-1,(60))
             img = img.astype(np.uint8)*255
             num += 1
             img = deskew(img)
             test_hog_descriptors.append(hog.compute(img,winStride=(20,20)))
-            test_lables.append(labs)
+            test_lables.append(str(labs))
         print('appended test '+str(files))
 hog_descriptors = np.squeeze(hog_descriptors)
 lables = np.squeeze(lables)
+print(lables)
 test_hog_descriptors = np.squeeze(test_hog_descriptors)
 test_lables = np.squeeze(test_lables)
+print(test_lables)
 print(hog_descriptors.shape)
 print('Begining feature selection...')
 #feature selection
@@ -132,11 +134,12 @@ modeltree = SelectFromModel(forest,prefit=True)
 X_new = modeltree.transform(hog_descriptors)
 test_new = modeltree.transform(test_hog_descriptors)
 print('Begining Knn fitting...')
-neigh = KNeighborsClassifier(n_neighbors=3)
+neigh = KNeighborsClassifier(n_neighbors=10)
 neigh.fit(X_new, lables)
 joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model.pkl')
 print('Model saved!')
 pred = neigh.predict(test_new)
+print('predicted....')
 print(pred.shape)
 print('Generate confusion matrix...')
 confusionMat(test_lables, pred)
