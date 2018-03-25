@@ -295,10 +295,10 @@ elif DATA is 'PROJECT':
                        'SevenTH','EightTH','NineTH']
     for s in range(2,3):
         print('STATUS: process data',str(100.0*s/3.0))
-        for j in range(0,N_CLASS):
+        for j in range(10,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:-1]
+            image = str(f.read()).split('\n')[:100]
             f.close()
             delList = []
             for i in range(len(image)):
@@ -343,7 +343,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
          BATCH_SIZE = 16,BATCH2PRINT = 1000,EPOCH = 1,LEARNING_RATE = 0.01,KEEP_PROB = 0.9):
 
 
-    global CNN_MODEL,LATENT_MODEL,LEARNING_ALGORITHM
+    global CNN_MODEL,LATENT_MODEL,LEARNING_ALGORITHM,PROG_PERF
     fin_AE = False
     if model is 'CNN':
         pass
@@ -424,7 +424,6 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
         if GETT_PATH != None:
             saver.restore(sess, GETT_PATH+model+'.ckpt')
             print("Get model from path: %s" % GETT_PATH+model+'.ckpt')
-
         if model is 'CNN':
             n_main = 1 # CNN run only one time
         else:
@@ -433,7 +432,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
         # list that store accuracy
         epoch_acc = []
         if PROGRAM is PROG_PERF:
-            if model is 'CNN':
+            if 1:
                 test_case = randint(0,len(testingSet[1]))
                 image = testingSet[0][test_case]
                 image = np.array(image)
@@ -473,8 +472,10 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 # specified image
                 if 0:
                     img = np.array(cv2.imread('0.jpg',0))
+                    img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
                     img = cv2.resize(img,(30,60))
-                    LoM = [img]
+
+                    LoM = [255*(img/255)]
 
                 # use image from camera
                 if 0:
@@ -482,7 +483,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
                 LoM = np.array(LoM)
                 LoC = copy.deepcopy(LoM)
-                LoC = LoC//255
+                LoC = LoC/255
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
 
                 '''*************************************************
