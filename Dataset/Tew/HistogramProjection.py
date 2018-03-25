@@ -5,10 +5,11 @@ import os
 
 current_dir = os.getcwd()
 print(current_dir)
-filelist = [x for x in listdir(current_dir + "\\") if x[-4:] == ".txt"]
+filelist = [x for x in listdir(current_dir + "\\Augmented_dataset") if x[-4:] == ".txt"]
 print(filelist)
 for file in filelist:
-    f = open(current_dir + "\\" + file, 'r')
+    f = open(current_dir + "\\Augmented_dataset\\" + file, 'r')
+
     data = f.read()
     f.close()
     data = data.split('\n')[:-1]
@@ -21,8 +22,10 @@ for file in filelist:
     histogram_y = list(map(lambda x: np.array(x) / max(x), histogram_y))
     all_histogram=np.array(list(map(lambda x,y: np.concatenate([x,y]),histogram_x,histogram_y)))
     all_histogram=np.around(all_histogram,4)
-    np.savetxt("project\\histogram_"+file,all_histogram,fmt="%1.4f",delimiter=",")
+    np.savetxt("project2\\histogram_"+file,all_histogram,fmt="%1.4f",delimiter=",")
     print(file)
+
+
 # data=data.split('\n')
 # print(len(data))
 # data=data[:-1]

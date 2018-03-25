@@ -8,14 +8,15 @@ print(current_dir)
 filelist = [x for x in listdir(current_dir + "\\") if x[-4:] == ".txt"]
 # print(filelist)
 for file in filelist:
-    f = open(current_dir + "\\" + file, 'r')
+    f = open(current_dir + "\\Augmented_dataset\\" + file, 'r')
     data = f.read()
+    print(len(data))
     f.close()
     data = data.split('\n')[:-1]
     data = list(map(lambda x: (1-(np.array(x.split(',')).reshape(-1, (60))).astype(np.uint8))*255, data))
     '''pre process image with erode and dilate'''
-    data = list(map(lambda x: cv2.dilate(x, np.ones([4, 3])), data))
-    data = list(map(lambda x: cv2.erode(x, np.ones([1, 4])), data))
+    # a
+    # data = list(map(lambda x: cv2.erode(x, np.ones([1, 4])), data))
     '''find contour and hierachy'''
     data = list(map(lambda x: cv2.findContours(x,mode=cv2.RETR_TREE,method=cv2.CHAIN_APPROX_NONE),data))
 
@@ -27,10 +28,10 @@ for file in filelist:
 
     ''' find possible number of contour (charaacter) in 1 file'''
     possibility= set(list(map(lambda x:len(x),character)))
-    for i in possibility:
-        percentage_in_file = 0
-        ''''''
-        print(percentage_in_file)
+    # for i in possibility:
+    #     percentage_in_file = 0
+    #     ''''''
+    #     print(percentage_in_file)
     print(possibility)
     print(file)
     print('********************')

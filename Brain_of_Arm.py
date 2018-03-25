@@ -162,7 +162,6 @@ def checkOreantation(img):
             p_ret = ret
     return ret
 
-
 def aspectRatio(img_f):
     img_fc = copy.deepcopy(img_f)
     img_fc, cfc, hfc = cv2.findContours(img_fc, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
@@ -185,7 +184,6 @@ def getWordSize(img_f):
     topmost = np.array(cnt[cnt[:,:,1].argmin()][0])
     bottommost = np.array(cnt[cnt[:,:,1].argmax()][0])
     return np.linalg.norm(leftmost-rightmost),np.linalg.norm(topmost-bottommost)
-
 
 def Get_Plate(img,sauvola_kernel=11,perc_areaTh=[0.005,0.5] ,numberOword=(0.5,1.5),minimumLength=0.05,plate_opening=3,char_opening=13,Siz=60.0):
 
@@ -453,34 +451,59 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
             cap = cv2.VideoCapture(1)
             image_indexy = 0
             while(True):
-
                 # Capture frame-by-frame
                 ret, frame = cap.read()
                 org = copy.deepcopy(frame)
                 # Our operations on the frame come here
-                org,LoM = Get_Plate(frame)
+                #org,LoM = Get_Plate(frame)
 
-                #LoM = np.array(LoM)
-                # Display the resulting frame
-                #ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
-                #image_indexy += 1
-                #LoM = [np.reshape(ts,(30,60))]
-                img = np.array(cv2.imread('0.jpg',0))
-                img = cv2.resize(img,(30,60))
-                #
-                LoM = [img]
+
+                '''*************************************************
+                *                                                  *
+                *             DATA PREPARATION                     *
+                *                                                  *
+                *************************************************'''
+
+                # loop through each testing image
+                if 1:
+                    ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
+                    image_indexy += 1
+                    LoM = [np.reshape(ts,(30,60))]
+
+                # specified image
+                if 0:
+                    img = np.array(cv2.imread('0.jpg',0))
+                    img = cv2.resize(img,(30,60))
+                    LoM = [img]
+
+                # use image from camera
+                if 0:
+                    pass
+
                 LoM = np.array(LoM)
                 LoC = copy.deepcopy(LoM)
                 LoC = LoC//255
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
-                print('prob',y_pred.eval(feed_dict={x: LoC, keep_prob: 1.0}))
-                LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
+
+                '''*************************************************
+                *                                                  *
+                *             MODEL PREDICTION                     *
+                *                                                  *
+                *************************************************'''
+
+                # use CNN
+                # LoC = list of predicted class
+                if 1:
+                    print('prob',y_pred.eval(feed_dict={x: LoC, keep_prob: 1.0}))
+                    LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
+
+
                 for i in range(0,len(LoM)):
                     LoMi = cv2.resize(LoM[i],(300,150))
-                    cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi,)
+                    cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi)
                     cv2.moveWindow('output'+str(i),300*i,80)
                 cv2.imshow('original',org)
-                if cv2.waitKey(300) & 0xFF == ord('q'):
+                if cv2.waitKey(3) & 0xFF == ord('q'):
                     break
                 for i in range(0,len(LoM)):
                     cv2.destroyWindow('output_'+str(i)+'_'+str(LoC[i]))
@@ -491,6 +514,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
             writer.close()
 
         return accuracy.eval(feed_dict={x: validationSet[0], y_: validationSet[1], keep_prob: 1.0})
+
 
 if model is 'CNN':
     HL = CNN_HIDDEN_LAYER
