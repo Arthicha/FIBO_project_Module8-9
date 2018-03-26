@@ -293,83 +293,6 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         img = IP.distorse(img,function='sine',axis='y',alpha=20,beta=2)
         cv2.imshow('img',img)
         cv2.waitKey(0)'''
-
-    class Plate():
-        #A class for plate
-        def __init__(self, image, cnt, word_cnt,extract_shape):
-            rect = cv2.minAreaRect(cnt)
-            box = cv2.boxPoints(rect)
-            box = np.int0(box)
-
-            word_rect = cv2.minAreaRect(word_cnt)
-            word_box = cv2.boxPoints(word_rect)
-            word_box = np.int0(word_box)
-
-            # print(word_rect)
-            M = cv2.moments(cnt)
-            cx = int(M['m10'] / M['m00'])
-            cy = int(M['m01'] / M['m00'])
-
-            color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-            cv2.drawContours(color, [box], 0, (0, 0, 255), 2)
-            cv2.drawContours(color, [word_box], 0, (0, 255, 0), 2)
-
-            matrix = cv2.getRotationMatrix2D((cx, cy), rect[2], 1)
-            # self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.remove_perspective(image,
-            #                                                                                                   word_box,
-            #                                                                                                 (50, 25))
-            # print(matrix)
-            self.image = image
-            self.cnt = cnt
-            self.PlateBox = box
-            self.Original_Word_Size = word_rect[1]
-            self.WordBox = word_box
-            self.CenterPlate = [cx, cy]
-            self.angle = rect[2]
-            # print(word_rect)
-            self.word_angle = word_rect[2]
-            self.show = color
-            self.UnrotateImg = cv2.warpAffine(image, matrix, image.shape, borderMode=cv2.BORDER_CONSTANT,
-                                              borderValue=255)
-            if word_rect[1][0] > word_rect[1][1]:
-                y1 = int(word_rect[1][0] / 2) + int(word_rect[0][0])
-                y2 = int(word_rect[0][0]) - int(word_rect[1][0] / 2)
-                x1 = int(word_rect[1][0] / 2) + int(word_rect[0][1])
-                x2 = int(word_rect[0][1]) - int(word_rect[1][0] / 2)
-            else:
-                y1 = int(word_rect[1][1] / 2) + int(word_rect[0][0])
-                y2 = int(word_rect[0][0]) - int(word_rect[1][1] / 2)
-                x1 = int(word_rect[1][1] / 2) + int(word_rect[0][1])
-                x2 = int(word_rect[0][1]) - int(word_rect[1][1] / 2)
-            # print([x2,x1,y2,y1])
-            # print(cx,cy)
-            self.UnrotateWord = cv2.resize(self.UnrotateImg[x2:x1, y2:y1], extract_shape)
-
-    def get_plate(image,extract_shape):
-        image1 = 255 - image
-        image1 = __class__.morph(image1, __class__.DILATE, [15, 15])
-        img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
-        all_plate = []
-        try:
-            for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
-                if hier[3] == -1:
-                    hierach = hier
-                    index = 0
-                    while hierach[2] != -1:
-                        index = hierach[2]
-                        hierach = hierarchy[0, index]
-                    all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
-            return all_plate
-        except:
-            return None
-
-    # example
-    # img = cv2.imread('ThreeEN.jpg',0)
-    # cv2.imshow('org',img)
-    # img = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.ztretch(img,axis='horizontal',percentage=0.6)
-    # cv2.imshow('result',img)
-    # cv2.waitKey(0)
-
     def remove_perspective(image, region, shape,org_shape=None,auto_sort= True):
         if org_shape == None:
             org_shape = shape
@@ -396,12 +319,120 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
 
             pts1 = np.float32([[region[0]],[region[1]],[region[2]],[region[3]]])
         #print(pts1.tolist())
-        #pts1 = np.float32([region[1], region[0], region[3], region[2]])
+        pts1 = np.float32([region[1], region[0], region[3], region[2]])
         #print([[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]])
         #print('point from auto shuffling',pts1)
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         img = cv2.warpPerspective(image, matrix, shape,borderValue=255)
         return img
+
+    class Plate():
+
+        #A class for plate
+        def __init__(self, image, cnt, word_cnt,extract_shape):
+            rect = cv2.minAreaRect(cnt)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            print(box)
+            word_rect = cv2.minAreaRect(word_cnt)
+            word_box = cv2.boxPoints(word_rect)
+            word_box = np.int0(word_box)
+
+            # print(word_rect)
+            M = cv2.moments(cnt)
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+
+            color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+            cv2.drawContours(color, [box], 0, (0, 0, 255), 2)
+            cv2.drawContours(color, [word_box], 0, (0, 255, 0), 2)
+            # cv2.imshow("color",color)
+            matrix = cv2.getRotationMatrix2D((cx, cy), rect[2], 1)
+            # self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.remove_perspective(image,
+            #                                                                                                   word_box,
+            #                                                                                                 (50, 25))
+            # print(matrix)
+            cv2.imshow("suck",image)
+            cv2.waitKey(0)
+            self.image = image
+            cv2.imshow("suck",self.image)
+            cv2.waitKey(0)
+            self.cnt = cnt
+            self.PlateBox = box
+            self.Original_Word_Size = word_rect[1]
+            self.WordBox = word_box
+            self.CenterPlate = [cx, cy]
+            self.angle = rect[2]
+            # print(word_rect)
+            self.word_angle = word_rect[2]
+            self.show = color
+            #self.UnrotateImg = cv2.warpAffine(image, matrix, image.shape, borderMode=cv2.BORDER_CONSTANT,borderValue=255)
+
+            self.UnrotateImg = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.remove_perspective(image,box,(int(rect[1][0]),int(rect[1][1])))
+
+            # self.UnrotateImg = image
+
+            if word_rect[1][0] > word_rect[1][1]:
+                y1 = int(word_rect[1][0] / 2) + int(self.UnrotateImg.shape[0]/2)
+                y2 = int(self.UnrotateImg.shape[0]/2) - int(word_rect[1][0] / 2)
+                x1 = int(word_rect[1][0] / 2) + int(word_rect[0][1])
+                x2 = int(self.UnrotateImg.shape[1]/2) - int(self.UnrotateImg.shape[1]/2 / 2)
+            else:
+                y1 = int(word_rect[1][1] / 2) + int(self.UnrotateImg.shape[0]/2)
+                y2 = int(self.UnrotateImg.shape[0]/2) - int(word_rect[1][1] / 2)
+                x1 = int(word_rect[1][1] / 2) + int(self.UnrotateImg.shape[1]/2)
+                x2 = int(self.UnrotateImg.shape[1]/2) - int(word_rect[1][1] / 2)
+            # y1 = int(word_rect[1][0] / 2 + word_rect[0][0])
+            # y2 = int(word_rect[0][0] - word_rect[1][0] / 2)
+            # x1 = int(word_rect[1][1] / 2 + word_rect[0][1])
+            # x2 = int(word_rect[0][1] - word_rect[1][1] / 2)
+            # print([x2,x1,y2,y1])
+            # print(cx,cy)
+            cv2.imshow("show",self.UnrotateImg)
+            cv2.waitKey(0)
+            print('image',self.UnrotateImg.shape, x2,x1,y2,y1)
+            self.UnrotateWord = cv2.resize(self.UnrotateImg[y2:y1, x2:x1], extract_shape)
+            # cv2.imshow("kkkkk",self.UnrotateWord)
+            # cv2.waitKey(100)
+            self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(
+                self.UnrotateWord)
+            # cv2.imshow("suk",self.UnrotateWord)
+            # cv2.waitKey(0)
+
+    def get_plate(image,extract_shape):
+        org = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
+        image1 = 255 - image
+        image1 = __class__.morph(image1, __class__.DILATE, [30, 30])
+        #cv2.imshow('image',image1)
+        #cv2.waitKey(0)
+        img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+        all_plate = []
+        cv2.drawContours(org,contours,-1,[255,0,0])
+        # cv2.imshow("jjjj",org)
+        #try:
+        if 1:
+            for cnt, hier, i in zip(contours, hierarchy[0], range(3)):
+
+                if hier[3] == -1:
+                    hierach = hier
+                    index = 0
+                    while hierach[2] != -1:
+                        index = hierach[2]
+                        hierach = hierarchy[0, index]
+                    all_plate.append(__class__.Plate(image, cnt, contours[index],extract_shape))
+            return all_plate
+        #except:
+            #print('return None')
+            #return None
+
+    # example
+    # img = cv2.imread('ThreeEN.jpg',0)
+    # cv2.imshow('org',img)
+    # img = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.ztretch(img,axis='horizontal',percentage=0.6)
+    # cv2.imshow('result',img)
+    # cv2.waitKey(0)
+
+
     # morph image acording to mode and value use to construct kernel
     # region value is box containing data that u want to remove perspective like [()]
     # example
@@ -501,21 +532,71 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
     def Adapt_Image(image):
         output_shape =(60,30) #
         ''' (width,height) of picture'''
+        # cv2.imshow("image",image)
+        # cv2.waitKey(0)
         dilate_kernel_shape=(10,10)
         '''2d (x,y) can adjust offset if too less can't extract'''
 
         inv_image = 255 - image
         dilate = cv2.dilate(inv_image, np.ones(dilate_kernel_shape))
+        col = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
+        # cv2.imshow("dil",dilate)
+        # cv2.waitKey(0)
         ret, cnt, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        cv2.drawContours(col,cnt,-1,[0,255,0])
+        # cv2.imshow("con",col)
+        # print(len(cnt))
+        # cv2.waitKey(0)
         try:
-            if len(cnt) > 0:
+            if len(cnt)>0:
                 rect = cv2.minAreaRect(cnt[0])
-                y1 = int(rect[1][0] / 2 + rect[0][0])
-                y2 = int(rect[0][0] - rect[1][0] / 2)
-                x1 = int(rect[1][1] / 2 + rect[0][1])
-                x2 = int(rect[0][1] - rect[1][1] / 2)
+                # print(rect)
+                # print(rect)
+                if rect[1][0] > rect[1][1]:
+                    y1 = int(rect[1][0] / 2 + rect[0][0])
+                    y2 = int(rect[0][0] - rect[1][0] / 2)
+                    x1 = int(rect[1][1] / 2 + rect[0][1])
+                    x2 = int(rect[0][1] - rect[1][1] / 2)
+                else:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][1])
+                    y2 = int(rect[0][1]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][0])
+                    x2 = int(rect[0][0]) - int(rect[1][0] / 2)
+                # print(x2, x1, y2, y1)
+                if y2<0 and y1-y2>40:
+                    y1 = int(rect[1][1] / 2) + int(rect[0][0])
+                    y2 = int(rect[0][0]) - int(rect[1][1] / 2)
+                    x1 = int(rect[1][0] / 2) + int(rect[0][1])
+                    x2 = int(rect[0][1]) - int(rect[1][0] / 2)
+                if(x2>x1):
+                    a=x2
+                    x2=x1
+                    x1=a
+                if (y2>y1):
+                    a = y2
+                    y2 = y1
+                    y1 = a
+                if x1>30 and x2>0 :
+                    a= y1
+                    b= x2
+                    x2 = y2
+                    y2 = b
+                    y1= x1
+                    x1 = a
+                if x2<0:
+                    x2=0
+                if x1>30:
+                    x1=30
+
+                # print(x2,x1,y2,y1)
+                # y1 = int(rect[1][0] / 2 + rect[0][0])
+                # y2 = int(rect[0][0] - rect[1][0] / 2)
+                # x1 = int(rect[1][1] / 2 + rect[0][1])
+                # x2 = int(rect[0][1] - rect[1][1] / 2)
                 img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
-                ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
+                # cv2.imshow("img",img)
+                # cv2.waitKey(0)
+                # ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)
                 return img
             else:
                 return image

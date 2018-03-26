@@ -49,7 +49,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # parallel operation
 CPU_NUM = 0
 
-
+np.set_printoptions(threshold=np.inf)
 
 
 '''*************************************************
@@ -120,7 +120,7 @@ elif DATA is 'PROJECT':
 CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[3,6],[3,6]]
+KERNEL_SIZE = [[3,3],[3,3]]
 POOL_SIZE = [[2,2],[3,3]]
 STRIDE_SIZE = [2,3]
 
@@ -454,7 +454,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 ret, frame = cap.read()
                 org = copy.deepcopy(frame)
                 # Our operations on the frame come here
-                #org,LoM = Get_Plate(frame)
+                org,LoM = Get_Plate(frame)
 
 
                 '''*************************************************
@@ -464,18 +464,28 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 *************************************************'''
 
                 # loop through each testing image
-                if 1:
+                if 0:
                     ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
                     image_indexy += 1
                     LoM = [np.reshape(ts,(30,60))]
 
                 # specified image
-                if 0:
-                    img = np.array(cv2.imread('0.jpg',0))
-                    img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
-                    img = cv2.resize(img,(30,60))
+                if 1:
+                    img = np.array(cv2.imread('oneone.jpg',0))
+                    ret, img = cv2.threshold(img, 127, 255,0)
 
-                    LoM = [255*(img/255)]
+                    #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
+                    img = cv2.resize(img,(30,60))
+                    imgr = (img//255)
+                    write = ''
+                    stringy = np.array2string((np.array(imgr.ravel())).astype(int), max_line_width=600000000,separator=',')
+                    write += stringy[1:-1]
+
+                    img = np.fromstring(write, dtype=float, sep=',')
+                    img = np.array(img)
+                    img = np.reshape(img,30*60)
+                    img = np.reshape(img,(60,30))
+                    LoM = [255*img]
 
                 # use image from camera
                 if 0:
@@ -483,7 +493,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
                 LoM = np.array(LoM)
                 LoC = copy.deepcopy(LoM)
-                LoC = LoC/255
+                LoC = LoC//255
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
 
                 '''*************************************************
@@ -504,7 +514,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi)
                     cv2.moveWindow('output'+str(i),300*i,80)
                 cv2.imshow('original',org)
-                if cv2.waitKey(3) & 0xFF == ord('q'):
+                if cv2.waitKey(0) & 0xFF == ord('q'):
                     break
                 for i in range(0,len(LoM)):
                     cv2.destroyWindow('output_'+str(i)+'_'+str(LoC[i]))
