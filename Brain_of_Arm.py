@@ -454,7 +454,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 ret, frame = cap.read()
                 org = copy.deepcopy(frame)
                 # Our operations on the frame come here
-                org,LoM = Get_Plate(frame)
+                #org,LoM = Get_Plate(frame)
 
 
                 '''*************************************************
@@ -471,7 +471,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
                 # specified image
                 if 1:
-                    img = np.array(cv2.imread('oneone.jpg',0))
+                    img = np.array(cv2.imread('image102.jpg',0))
                     ret, img = cv2.threshold(img, 127, 255,0)
 
                     #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)

@@ -139,17 +139,17 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
        img = ipaddr.capture( camera)
        cv2.imshow('img',img)
        cv2.waitKey(0)'''
-
     def translate(image, value, config=None):
         matrix = np.float32([[1, 0, value[0]], [0, 1, value[1]]])
         if config is None:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape)
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]))
         elif config[1] == __class__.BORDER_CONSTANT:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1], borderValue=config[2])
         else:
-            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=image.shape, flags=config[0],
+            img = cv2.warpAffine(image, dst=None, M=matrix, dsize=(image.shape[1],image.shape[0]), flags=config[0],
                                  borderMode=config[1])
+
         return img
     # translate image (move to the left right or whatever by value)
     # example
@@ -398,6 +398,18 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(self.UnrotateWord)
             # cv2.imshow("suk",self.UnrotateWord)
             # cv2.waitKey(0)
+
+    def auto_canny(image, sigma=0.33):
+        # compute the median of the single channel pixel intensities
+        v = np.median(image)
+
+        # apply automatic Canny edge detection using the computed median
+        lower = int(max(0, (1.0 - sigma) * v))
+        upper = int(min(255, (1.0 + sigma) * v))
+        edged = cv2.Canny(image, lower, upper)
+
+        # return the edged image
+        return edged
 
     def get_plate(image,extract_shape):
         org = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
