@@ -471,7 +471,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
                 # specified image
                 if 1:
-                    img = np.array(cv2.imread('image16.jpg',0))
+                    img = np.array(cv2.imread('image15.jpg',0))
 
 
                     #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
