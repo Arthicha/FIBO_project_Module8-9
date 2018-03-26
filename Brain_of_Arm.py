@@ -117,12 +117,12 @@ elif DATA is 'PROJECT':
     imgSize = [30,60]
     N_CLASS = 30
 
-CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
+CNN_HIDDEN_LAYER = [32,32,64,64,128] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[3,3],[3,3]]
-POOL_SIZE = [[2,2],[3,3]]
-STRIDE_SIZE = [2,3]
+KERNEL_SIZE = [[3,3],[3,3],[3,3],[3,3]]
+POOL_SIZE = [[2,2],None,[3,3],None]
+STRIDE_SIZE = [2,0,3,0]
 
 BATCH_SIZE = 2000
 
@@ -471,21 +471,24 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
                 # specified image
                 if 1:
-                    img = np.array(cv2.imread('image102.jpg',0))
-                    ret, img = cv2.threshold(img, 127, 255,0)
+                    img = np.array(cv2.imread('image16.jpg',0))
+
 
                     #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
                     img = cv2.resize(img,(30,60))
-                    imgr = (img//255)
-                    write = ''
-                    stringy = np.array2string((np.array(imgr.ravel())).astype(int), max_line_width=600000000,separator=',')
-                    write += stringy[1:-1]
+                    img = IP.auto_canny(img)
 
-                    img = np.fromstring(write, dtype=float, sep=',')
+                    ret, img = cv2.threshold(img, 1, 255,0)
+                    #imgr = (img//255)
+                    print('input',img)
+
+                    '''img = np.fromstring(write, dtype=float, sep=',')
                     img = np.array(img)
                     img = np.reshape(img,30*60)
-                    img = np.reshape(img,(60,30))
-                    LoM = [255*img]
+                    img = np.reshape(img,(60,30))'''
+
+                    LoM = [img]
+                    print('input',LoM)
 
                 # use image from camera
                 if 0:
@@ -495,6 +498,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 LoC = copy.deepcopy(LoM)
                 LoC = LoC//255
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
+
 
                 '''*************************************************
                 *                                                  *
@@ -513,6 +517,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     LoMi = cv2.resize(LoM[i],(300,150))
                     cv2.imshow('output_'+str(i)+'_'+str(LoC[i]),LoMi)
                     cv2.moveWindow('output'+str(i),300*i,80)
+
                 cv2.imshow('original',org)
                 if cv2.waitKey(0) & 0xFF == ord('q'):
                     break
