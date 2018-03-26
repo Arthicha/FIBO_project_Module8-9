@@ -454,7 +454,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 ret, frame = cap.read()
                 org = copy.deepcopy(frame)
                 # Our operations on the frame come here
-                #org,LoM = Get_Plate(frame)
+                org,LoM = Get_Plate(frame)
 
 
                 '''*************************************************
