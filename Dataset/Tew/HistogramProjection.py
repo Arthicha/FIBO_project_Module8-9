@@ -23,6 +23,8 @@ for file in filelist:
     histogram_y = list(map(lambda x: np.array(x) / max(x), histogram_y))
     all_histogram=np.array(list(map(lambda x,y: np.concatenate([x,y]),histogram_x,histogram_y)))
     all_histogram=np.around(all_histogram,4)
+    # if "EightTH" in file:
+    #     pass
     np.savetxt("project2\\histogram_"+file,all_histogram,fmt="%1.4f",delimiter=",")
     print(file)
 

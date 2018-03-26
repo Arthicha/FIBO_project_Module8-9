@@ -25,7 +25,7 @@ Data_used = 'Project_data'  # iris for scikit given data of flower
 minimum_samples_split = 0.01  # The minimum number of samples required to split an internal node:
                               # used float for percentage of all sample
                             # used int for exact number of sample
-multi_output = True
+multi_output = False
 
 feature_selection = 'Tree_based'  # 'Tree_based' for tree
 # 'L1_based'  for lasso algorithm
@@ -33,6 +33,7 @@ feature_selection = 'Tree_based'  # 'Tree_based' for tree
 k = 3
 
 # Data
+
 ''' data '''
 if Data_used == 'iris':
     iris = load_iris()
@@ -48,7 +49,7 @@ elif Data_used == 'Project_data':
         data = f.read()
         f.close()
         data = data.split('\n')[:-1]
-        data = list(map(lambda x: np.array(x.split(',')).reshape(30).astype(np.float64).tolist(), data))
+        data = list(map(lambda x: np.array(x.split(',')).reshape(90).astype(np.float64).tolist(), data))
         feature = feature + data
         target = target + [i.split('_')[2] for x in range(0, len(data))]
 else:
@@ -124,8 +125,9 @@ for train, test in splitted:
     test_data, val_data, test_target, val_target = train_test_split(test_validate_input_data, test_validate_target_data,
                                                                     test_size=0.5)
     model.fit(train_in_set, train_target_set)
-    for j in range(len(test_data)):
-        print(model.predict([test_data[j]]))
+    if multi_output:
+        for j in range(len(test_data)):
+            print(model.predict([test_data[j]]))
     train_score = model.score(train_in_set, train_target_set)
     print("train score :   " + str(train_score))
     val_score = model.score(val_data, val_target)
