@@ -25,10 +25,10 @@ from IP_ADDR import Image_Processing_And_Do_something_to_make_Dataset_be_Ready a
 
 IMG_SIZE = (100,100)
 IMG_COPY = 100
-CLASS = '4T1'
+CLASS = '4T0'
 CAM_PORT = 1
 
-THRES = 150
+THRES = 130
 MINIMUM_LENGTH = 0.05
 AREA_RATIO = 0.10
 
@@ -55,6 +55,7 @@ while(True):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     _, img = cv2.threshold(gray, THRES, 255,0)
+    frame = copy.copy(img)
     _, contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #cv2.drawContours(frame, contours, -1, (0,0,255), 3)
     plate = []
