@@ -25,6 +25,7 @@ import random
 # 4. our own module
 from Tenzor import TenzorCNN,TenzorNN,TenzorAE
 from IP_ADDR import Image_Processing_And_Do_something_to_make_Dataset_be_Ready as IP
+from Retinutella_theRobotEye import Retinutella
 
 # 5. visualization module
 import matplotlib.pyplot as plt
@@ -37,7 +38,9 @@ import matplotlib.pyplot as plt
 
 N_CLASS = 30
 IMG_SIZE = (30,60)
+np.set_printoptions(threshold=np.inf)
 
+eye = [Retinutella('front',1,0,1)]
 
 '''*************************************************
 *                                                  *
@@ -45,13 +48,21 @@ IMG_SIZE = (30,60)
 *                                                  *
 *************************************************'''
 
+while(1):
+    image = eye[0].getListOfPlate()
+    eye[0].show(wait=10)
+
+eye[0].close()
+
 '''*************************************************
 *                                                  *
 *                     function                     *
 *                                                  *
 *************************************************'''
 
-def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2]):
+
+
+def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2],dtype=np.uint8):
 
     '''
     this function get dataset from compress file in
@@ -60,6 +71,7 @@ def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2]):
     :parameter: n = amount of data in each class
     :parameter: ttv = number of data to get in testing,
                 training abd validating dataset
+    :parameter: dtype is numpy data type np.uint8 or np.float32
     :return: testing, training and validating dataset
     '''
 
@@ -81,7 +93,7 @@ def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2]):
             image = str(f.read()).split('\n')[:n]
             f.close()
             for i in range(len(image)):
-                image[i] = np.fromstring(image[i], dtype=float, sep=',')
+                image[i] = np.fromstring(image[i], dtype=dtype, sep=',')
                 image[i] = np.array(image[i])
                 image[i] = np.reshape(image[i],(IMG_SIZE[0]*IMG_SIZE[1]))
             TestTrainValidate[s] += image

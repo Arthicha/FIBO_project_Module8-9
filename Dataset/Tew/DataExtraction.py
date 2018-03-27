@@ -44,10 +44,10 @@ FILEDICT = {"zero": "zero", "one": "one", "two": "two", "three": "three", "four"
             "หก ": "SixTH",
             "เจ็ด ": "SevenTH", "แปด ": "EightTH", "เก้า ": "NineTH"}
 
-DATASET = ['test','train','validate']
+DATASET = ['test','validate','train']
 
 IMG_SIZE = (60,30)
-THRES = 150
+THRES = 100
 
 
 print(PATH)
@@ -64,16 +64,17 @@ for n in range(0,len(NUM)):
     for t in range(0,len(TYPE)):
         type = TYPE[t]
 
+        '''if (num != '9') or (type != 'T'):
+            continue'''
         process = 0
         for font in FONT:
-
             filename = num+type+font+'.png'
             filepath = DATASET_PATH+'\\'+filename
             compressname = FILEDICT[WORDLIST[n+t*10]]
 
             if font in FONT[:int(len(FONT)*0.2)]:
                 set = DATASET[0]
-            elif font in FONT[int(len(FONT)*0.2):int(len(FONT)*0.8)]:
+            elif font in FONT[int(len(FONT)*0.2):int(len(FONT)*0.4)]:
                 set = DATASET[1]
             else:
                 set = DATASET[2]
@@ -89,7 +90,7 @@ for n in range(0,len(NUM)):
                     _, plate = cv2.threshold(plate, THRES, 255,0)
 
                     cv2.imshow('frame2',plate)
-                    plate = ip.get_plate(plate,IMG_SIZE,dilate=30)
+                    plate = ip.get_plate(plate,IMG_SIZE,dilate=35)
                     plate = plate[0].UnrotateWord
 
                     stringy = np.array2string(((plate.ravel())).astype(int),max_line_width=int(IMG_SIZE[0]*IMG_SIZE[1]*(5*img.shape[1]/img.shape[0]))
@@ -105,28 +106,31 @@ for n in range(0,len(NUM)):
 
             else:
                 sys.exit('ERROR: file '+filepath+' does not exist')
+            # increment variable
+            process += 1
 
             if process==len(FONT)*0.2:
+                print('write test')
                 open(COMPRES_PATH+"\\dataset" + "_" + compressname+"_"+"test" + '.txt', 'w').close()
                 file = open(COMPRES_PATH+"\\dataset"+"_"+compressname +"_"+"test"+ '.txt', 'a')
                 file.write(write)
                 file.close()
                 write = ''
             elif process == len(FONT)*0.4:
+                print('write train')
                 open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "validate" + '.txt', 'w').close()
                 file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "validate" + '.txt', 'a')
                 file.write(write)
                 file.close()
                 write = ''
-            elif process == len(FONT)-1:
-                open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train" + '.txt', 'w').close()
-                file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train"+ '.txt', 'a')
-                file.write(write)
-                file.close()
-                write = ''
+
+        open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train" + '.txt', 'w').close()
+        file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train"+ '.txt', 'a')
+        file.write(write)
+        file.close()
+        write = ''
 
 
-            # increment variable
-            process += 1
+
 
 
