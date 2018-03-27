@@ -117,12 +117,12 @@ elif DATA is 'PROJECT':
     imgSize = [30,60]
     N_CLASS = 30
 
-CNN_HIDDEN_LAYER = [32,32,64,64,128] #amount of layer > 3
+CNN_HIDDEN_LAYER = [32,64,128,256,512,512] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[3,3],[3,3],[3,3],[3,3]]
-POOL_SIZE = [[2,2],None,[3,3],None]
-STRIDE_SIZE = [2,0,3,0]
+KERNEL_SIZE = [[5,5],[5,5],[3,3],[3,3],[3,3]]
+POOL_SIZE = [[2,2],None,[3,3],None,None]
+STRIDE_SIZE = [2,0,3,0,0]
 
 BATCH_SIZE = 2000
 
@@ -298,7 +298,7 @@ elif DATA is 'PROJECT':
         for j in range(10,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:-1]
+            image = str(f.read()).split('\n')[:100]
             f.close()
             delList = []
             for i in range(len(image)):

@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 
 N_CLASS = 30
 IMG_SIZE = (30,60)
-
+np.set_printoptions(threshold=np.inf)
 
 '''*************************************************
 *                                                  *
@@ -105,5 +105,6 @@ def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2],dtype=np.uint8):
     testingSet  = [TestTrainValidate[ttv[0]],LabelTTT[ttv[0]]]
     validationSet = [TestTrainValidate[ttv[2]],LabelTTT[ttv[2]]]
     return testingSet,trainingSet,validationSet
+
 
 
