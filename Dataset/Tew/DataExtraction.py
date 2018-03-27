@@ -62,8 +62,6 @@ for n in range(0,len(NUM)):
     num = NUM[n]
     for t in range(0,len(TYPE)):
         type = TYPE[t]
-        if (num != '9') or (type != 'T'):
-            continue
 
         process = 0
         for font in FONT:
