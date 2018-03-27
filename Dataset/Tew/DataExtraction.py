@@ -47,7 +47,7 @@ FILEDICT = {"zero": "zero", "one": "one", "two": "two", "three": "three", "four"
 DATASET = ['test','train','validate']
 
 IMG_SIZE = (60,30)
-THRES = 150
+THRES = 100
 
 
 print(PATH)
@@ -63,11 +63,11 @@ for n in range(0,len(NUM)):
     num = NUM[n]
     for t in range(0,len(TYPE)):
         type = TYPE[t]
+
         '''if (num != '9') or (type != 'T'):
             continue'''
         process = 0
         for font in FONT:
-
             filename = num+type+font+'.png'
             filepath = DATASET_PATH+'\\'+filename
             compressname = FILEDICT[WORDLIST[n+t*10]]
