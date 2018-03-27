@@ -395,7 +395,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             self.UnrotateWord = cv2.resize(self.UnrotateImg[y2:y1, x2:x1], extract_shape)
             # cv2.imshow("kkkkk",self.UnrotateWord)
             # cv2.waitKey(100)
-            self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(self.UnrotateWord)
+            self.UnrotateWord = Image_Processing_And_Do_something_to_make_Dataset_be_Ready.Adapt_Image(self.UnrotateWord,extract_shape)
             # cv2.imshow("suk",self.UnrotateWord)
             # cv2.waitKey(0)
 
@@ -411,10 +411,10 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         # return the edged image
         return edged
 
-    def get_plate(image,extract_shape):
+    def get_plate(image,extract_shape,dilate=30):
         org = cv2.cvtColor(image,cv2.COLOR_GRAY2BGR)
         image1 = 255 - image
-        image1 = __class__.morph(image1, __class__.DILATE, [30,30])
+        image1 = __class__.morph(image1, __class__.DILATE, [dilate,dilate])
         #cv2.imshow('image',image1)
         #cv2.waitKey(0)
         img, contours, hierarchy = cv2.findContours(image1, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
@@ -541,8 +541,8 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
 
         return image
 
-    def Adapt_Image(image):
-        output_shape =(60,30) #
+    def Adapt_Image(image,output_shape):
+        #output_shape =(60,30) #
         ''' (width,height) of picture'''
         # cv2.imshow("image",image)
         # cv2.waitKey(0)
@@ -588,7 +588,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     a = y2
                     y2 = y1
                     y1 = a
-                if x1>30 and x2>0 :
+                if x1>output_shape[1]and x2>0 :
                     a= y1
                     b= x2
                     x2 = y2
@@ -597,15 +597,15 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                     x1 = a
                 if x2<0:
                     x2=0
-                if x1>30:
-                    x1=30
+                if x1>output_shape[1]:
+                    x1=output_shape[1]
 
                 # print(x2,x1,y2,y1)
                 # y1 = int(rect[1][0] / 2 + rect[0][0])
                 # y2 = int(rect[0][0] - rect[1][0] / 2)
                 # x1 = int(rect[1][1] / 2 + rect[0][1])
                 # x2 = int(rect[0][1] - rect[1][1] / 2)
-                img = cv2.resize(image[x2:x1, y2:y1], (60, 30))
+                img = cv2.resize(image[x2:x1, y2:y1], output_shape)
                 # cv2.imshow("img",img)
                 # cv2.waitKey(0)
                 # ret,img = cv2.threshold(img,180,255,cv2.THRESH_BINARY)

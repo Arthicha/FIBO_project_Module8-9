@@ -464,23 +464,23 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 *************************************************'''
 
                 # loop through each testing image
-                if 0:
+                if 1:
                     ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
                     image_indexy += 1
                     LoM = [np.reshape(ts,(30,60))]
 
                 # specified image
-                if 1:
-                    img = np.array(cv2.imread('image15.jpg',0))
+                if 0:
+                    img = np.array(cv2.imread('twoTH.jpg',0))
 
 
                     #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
                     img = cv2.resize(img,(30,60))
-                    img = IP.auto_canny(img)
+                    #img = IP.auto_canny(img)
 
-                    ret, img = cv2.threshold(img, 1, 255,0)
+                    ret, img = cv2.threshold(img, 200, 255,0)
                     #imgr = (img//255)
-                    print('input',img)
+                    #print('input',img)
 
                     '''img = np.fromstring(write, dtype=float, sep=',')
                     img = np.array(img)
