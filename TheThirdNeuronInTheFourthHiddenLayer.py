@@ -50,7 +50,8 @@ eye = [Retinutella('front',1,0,1)]
 
 while(1):
     image = eye[0].getListOfPlate()
-    eye[0].show(wait=10)
+    print(image[0])
+    eye[0].show(image,wait=10)
 
 eye[0].close()
 

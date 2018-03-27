@@ -376,7 +376,6 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                 if min_cost >= cost:
                     min_cost = cost
                     best_pts = pts_1
-                print(coss)
             pts_1 = best_pts
             pts2 = np.float32([[0, 0], [shape[0], 0], [shape[0], shape[1]], [0, shape[1]]])
 

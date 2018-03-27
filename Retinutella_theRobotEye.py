@@ -187,8 +187,3 @@ def saveImage():
     cam1.close()
 
 
-R = Retinutella('test',1,0,1)
-while(1):
-    img = R.getImage()
-    R.show(img,wait=30)
-#saveImage()
