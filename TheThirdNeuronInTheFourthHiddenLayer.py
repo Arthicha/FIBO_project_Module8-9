@@ -25,6 +25,7 @@ import random
 # 4. our own module
 from Tenzor import TenzorCNN,TenzorNN,TenzorAE
 from IP_ADDR import Image_Processing_And_Do_something_to_make_Dataset_be_Ready as IP
+from Retinutella_theRobotEye import Retinutella
 
 # 5. visualization module
 import matplotlib.pyplot as plt
@@ -39,17 +40,27 @@ N_CLASS = 30
 IMG_SIZE = (30,60)
 np.set_printoptions(threshold=np.inf)
 
+eye = [Retinutella('front',1,0,1)]
+
 '''*************************************************
 *                                                  *
 *                   main program                   *
 *                                                  *
 *************************************************'''
 
+while(1):
+    image = eye[0].getListOfPlate()
+    eye[0].show(wait=10)
+
+eye[0].close()
+
 '''*************************************************
 *                                                  *
 *                     function                     *
 *                                                  *
 *************************************************'''
+
+
 
 def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2],dtype=np.uint8):
 
@@ -105,6 +116,5 @@ def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2],dtype=np.uint8):
     testingSet  = [TestTrainValidate[ttv[0]],LabelTTT[ttv[0]]]
     validationSet = [TestTrainValidate[ttv[2]],LabelTTT[ttv[2]]]
     return testingSet,trainingSet,validationSet
-
 
 

@@ -113,7 +113,7 @@ for n in range(0,len(NUM)):
                 file.write(write)
                 file.close()
                 write = ''
-            elif process == len(FONT)*0.4:
+            elif process == len(FONT)*0.6:
                 open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "validate" + '.txt', 'w').close()
                 file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "validate" + '.txt', 'a')
                 file.write(write)
