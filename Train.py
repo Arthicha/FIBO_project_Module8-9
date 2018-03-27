@@ -74,7 +74,6 @@ CONTINUE = False
 GETT_PATH = None#"D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\model"
 SAVE_PATH = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\model"
 
-#comment
 BATCH2PRINT = 20
 EPOCH = 2000
 AUGMENT = AUG_NONE
