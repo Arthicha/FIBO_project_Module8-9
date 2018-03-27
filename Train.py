@@ -108,12 +108,12 @@ elif DATA is 'PROJECT':
     N_CLASS = 30
 
 
-CNN_HIDDEN_LAYER = [32,64,128] #amount of layer > 3
+CNN_HIDDEN_LAYER = [32,64,128,256,512,512] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
-AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],1000,100,10,100,1000,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[3,6],[3,6]]
-POOL_SIZE = [[2,2],[3,3]]
-STRIDE_SIZE = [2,3]
+AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
+KERNEL_SIZE = [[5,5],[5,5],[3,3],[3,3],[3,3]]
+POOL_SIZE = [[2,2],None,[3,3],None,None]
+STRIDE_SIZE = [2,0,3,0,0]
 
 BATCH_SIZE = 2000
 
@@ -370,7 +370,7 @@ def main(best_accuracy,model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=N
             saver.restore(sess, GETT_PATH+filename+'.ckpt')
             print("Get model from path: %s" % GETT_PATH+filename+'.ckpt')
 
-
+        input('>>>>')
         #len(mnist.train.labels)
 
         # list that store accuracy
