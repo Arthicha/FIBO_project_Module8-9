@@ -87,12 +87,16 @@ for n in range(0,len(NUM)):
                     plate = img[:,x-img.shape[0]:x]
 
                     _, plate = cv2.threshold(plate, THRES, 255,0)
+
                     cv2.imshow('frame2',plate)
-                    plate = ip.get_plate(plate,IMG_SIZE,dilate=50)
+                    plate = ip.get_plate(plate,IMG_SIZE,dilate=30)
                     plate = plate[0].UnrotateWord
-                    stringy = np.array2string(((plate.ravel())).astype(int),max_line_width=int(IMG_SIZE[0]*IMG_SIZE[1]*(2*img.shape[1]/img.shape[0]))
+
+                    stringy = np.array2string(((plate.ravel())).astype(int),max_line_width=int(IMG_SIZE[0]*IMG_SIZE[1]*(5*img.shape[1]/img.shape[0]))
                                               ,separator=',')
+
                     write += stringy[1:-1] + "\n"
+
 
                     cv2.imshow('frame',plate)
                     cv2.waitKey(1)
