@@ -44,7 +44,7 @@ FILEDICT = {"zero": "zero", "one": "one", "two": "two", "three": "three", "four"
             "หก ": "SixTH",
             "เจ็ด ": "SevenTH", "แปด ": "EightTH", "เก้า ": "NineTH"}
 
-DATASET = ['test','train','validate']
+DATASET = ['test','validate','train']
 
 IMG_SIZE = (60,30)
 THRES = 100
@@ -74,7 +74,7 @@ for n in range(0,len(NUM)):
 
             if font in FONT[:int(len(FONT)*0.2)]:
                 set = DATASET[0]
-            elif font in FONT[int(len(FONT)*0.2):int(len(FONT)*0.8)]:
+            elif font in FONT[int(len(FONT)*0.2):int(len(FONT)*0.4)]:
                 set = DATASET[1]
             else:
                 set = DATASET[2]
@@ -106,28 +106,31 @@ for n in range(0,len(NUM)):
 
             else:
                 sys.exit('ERROR: file '+filepath+' does not exist')
+            # increment variable
+            process += 1
 
             if process==len(FONT)*0.2:
+                print('write test')
                 open(COMPRES_PATH+"\\dataset" + "_" + compressname+"_"+"test" + '.txt', 'w').close()
                 file = open(COMPRES_PATH+"\\dataset"+"_"+compressname +"_"+"test"+ '.txt', 'a')
                 file.write(write)
                 file.close()
                 write = ''
             elif process == len(FONT)*0.4:
+                print('write train')
                 open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "validate" + '.txt', 'w').close()
                 file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "validate" + '.txt', 'a')
                 file.write(write)
                 file.close()
                 write = ''
-            elif process == len(FONT)-1:
-                open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train" + '.txt', 'w').close()
-                file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train"+ '.txt', 'a')
-                file.write(write)
-                file.close()
-                write = ''
+
+        open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train" + '.txt', 'w').close()
+        file = open(COMPRES_PATH+"\\dataset" + "_" + compressname + "_" + "train"+ '.txt', 'a')
+        file.write(write)
+        file.close()
+        write = ''
 
 
-            # increment variable
-            process += 1
+
 
 
