@@ -47,7 +47,7 @@ FILEDICT = {"zero": "zero", "one": "one", "two": "two", "three": "three", "four"
 DATASET = ['test','train','validate']
 
 IMG_SIZE = (60,30)
-THRES = 150
+THRES = 100
 
 
 print(PATH)
@@ -64,9 +64,10 @@ for n in range(0,len(NUM)):
     for t in range(0,len(TYPE)):
         type = TYPE[t]
 
+        '''if (num != '9') or (type != 'T'):
+            continue'''
         process = 0
         for font in FONT:
-
             filename = num+type+font+'.png'
             filepath = DATASET_PATH+'\\'+filename
             compressname = FILEDICT[WORDLIST[n+t*10]]
@@ -89,7 +90,7 @@ for n in range(0,len(NUM)):
                     _, plate = cv2.threshold(plate, THRES, 255,0)
 
                     cv2.imshow('frame2',plate)
-                    plate = ip.get_plate(plate,IMG_SIZE,dilate=30)
+                    plate = ip.get_plate(plate,IMG_SIZE,dilate=35)
                     plate = plate[0].UnrotateWord
 
                     stringy = np.array2string(((plate.ravel())).astype(int),max_line_width=int(IMG_SIZE[0]*IMG_SIZE[1]*(5*img.shape[1]/img.shape[0]))
