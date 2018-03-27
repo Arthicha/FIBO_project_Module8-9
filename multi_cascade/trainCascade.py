@@ -11,8 +11,9 @@ import os
 import sys
 import platform
 from random import choice, randrange, shuffle
+from time import sleep
 
-from PIL import Image
+from PIL import Image, ImageOps
 from math import sqrt, pow
 import numpy as np
 
@@ -25,6 +26,8 @@ import numpy as np
 
 dirCom = '/'
 scaleWeightHeight = 0.5
+scalePosNeg = 3
+memoryUse = 8192
 
 listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
                 'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
@@ -65,7 +68,7 @@ def main():
         print('param:\tmain_class -- number\tmain_class -- numpos -- numneg -- numstate\tnon_finished\tnon_finished')
         print('\tone 1000\t\tone 800 2400 10\t\t\t\t\t-\t\t-')
         print('------------------------------------------------------------------------------------')
-        print('generate 30 classification  : required --> libopencv-dev, linuux os ')
+        print('generate 30 classification  : required --> libopencv-dev, linux os ')
         print('trainCascade.py autogen [param]')
         print('param:\tnumber/class -- main_image -- h_size -- numstate -- state(repackage,unrepackage) -- feature(HAAR, HOG, LBP)')
         print('\t1000 \t\ttrain-0 \t24 \t10 \t\trepackage \t\t\tHAAR\n')
@@ -189,8 +192,9 @@ def generate_picture(limitFilePerClass = 50):
                 image[i] = np.array(image[i])
                 
                 image[i] = np.reshape(image[i],WHfromArray1D(len(image[i])))
-
                 img = Image.fromarray((image[i]*255).astype(np.uint8))
+                # img = ImageOps.invert(img) 
+
                 img.save(path)
 
                 if numCount > int(limitFilePerClass)-1 :
@@ -241,6 +245,7 @@ def resize_image(selectFile = 'test-0.png', size = 24):
             sys.exit('size is bigger than '+str(img.height)+','+str(img.width))
         
         img = img.resize((int(int(size)/scaleWeightHeight),int(size)),Image.ANTIALIAS)
+
         img.save('data'+dirCom+f)
         
         if f.split('_')[1] == selectFile:
@@ -294,7 +299,7 @@ def create_bg_txt(select_value):
             # else:
             #     f_neg.write("data"+dirCom+f+"\n")
             #     countNeg+=1
-        countNegs = int(countPos/len(listOfClass))*len(listOfClass)
+        countNegs = int(countPos/len(listOfClass))*len(listOfClass) * scalePosNeg
         
         keepList = []
         while (countNeg < countNegs):
@@ -329,7 +334,7 @@ def run_opencv_createsamples(main_class='',number=''):
 
     weight, height = Image.open('main_img'+dirCom+os.listdir('main_img')[0]).size
 
-    command = 'opencv_createsamples -img main_img'+dirCom+str(main_class)+'* -bg bg_pos.txt -vec positives.vec -maxxangle 1.2 -maxyangle 1.2 -maxzangle 0.5 -num '+str(number) +' -w '+str(weight)+' -h '+str(height)
+    command = 'opencv_createsamples -img main_img'+dirCom+str(main_class)+'* -bg bg_pos.txt -vec positives.vec -bgcolor 0 -maxxangle 1.2 -maxyangle 1.2 -maxzangle 0.5 -num '+str(number) +' -w '+str(weight)+' -h '+str(height)
     os.system(command)
 
 def run_opencv_traincascade(main_class='0',numpos=0,numneg=0,numstate=0,feature='HAAR'):
@@ -343,7 +348,7 @@ def run_opencv_traincascade(main_class='0',numpos=0,numneg=0,numstate=0,feature=
     
     weight, height = Image.open('main_img'+dirCom+os.listdir('main_img')[0]).size
     
-    command = 'opencv_traincascade -featureType '+str(feature)+' -data output_data'+dirCom+str(main_class) +dirCom +' -vec positives.vec -bg bg_neg.txt -numPos '+str(numpos)+' -numNeg '+str(numneg)+' -numStages '+str(numstate)+' -w '+str(weight)+' -h '+str(height)+' -precalcValBufSize 2048 -precalcIdxBufSize 2048'
+    command = 'opencv_traincascade -featureType '+str(feature)+' -data output_data'+dirCom+str(main_class) +dirCom +' -vec positives.vec -bg bg_neg.txt -numPos '+str(numpos)+' -numNeg '+str(numneg)+' -numStages '+str(numstate)+' -w '+str(weight)+' -h '+str(height)+' -precalcValBufSize '+str(memoryUse)+' -precalcIdxBufSize '+str(memoryUse)
     os.system(command)
 
 def run_opencv_haartraining():
@@ -373,10 +378,23 @@ def AutoGenerateClassification(numberPerClass=1000, main_img='train-0',size=24, 
         with open('bg_pos.txt','r') as f :
             countPos = len(str(f.read()).split('\n'))
 
-        num = predictNumPosNumNeg(countPos=countPos,countNeg=countNeg)    
-        renum = predictNumPosNumNeg(countPos=num[0]*4/5,countNeg=num[1]*4/5)    
-        run_opencv_createsamples(main_class=selectClass,number=int(num[0]))
-        run_opencv_traincascade(main_class=selectClass,numpos=int(renum[0]),numneg=int(renum[1]),numstate=int(numstate),feature=feature)
+        num = predictNumPosNumNeg(countPos=countPos*4/5,countNeg=countNeg*4/5)    
+        # renum = predictNumPosNumNeg(countPos=num[0]*4/5,countNeg=num[1]*4/5)    
+        run_opencv_createsamples(main_class=selectClass,number=int(num[0]*5/4))
+        run_opencv_traincascade(main_class=selectClass,numpos=int(num[0]),numneg=int(num[1]),numstate=int(numstate),feature=feature)
+
+    print('wait for delete unuse data')
+    for f in [f for f in os.listdir('dataExtract')]:
+        os.remove(os.path.join('dataExtract',f)) 
+    for f in [f for f in os.listdir('data')]:
+        os.remove(os.path.join('data',f)) 
+    print('remove extract data')
+    for f in [f for f in os.listdir('main_img')]:
+        os.remove(os.path.join('main_img',f)) 
+    print('remove main_img')
+
+
+        
 
 def deleteMainCascadeFile():
     '''delete all cascade file in folder output_data. '''

@@ -66,7 +66,7 @@ class multiCascade():
             self.callClassifiers(feature=feature)
         img = image
 
-        returnData = []
+        returnData = {}
         for selectClassifier in list(self.multiClassifiers):
             if feature == 'HAAR':
                 output = self.multiClassifiers[selectClassifier].detectMultiScale(img, scaleFactor= 3.2,minNeighbors= 5)
@@ -77,19 +77,23 @@ class multiCascade():
                 output = self.multiClassifiers[selectClassifier].detectMultiScale(img,  scaleFactor= 3.2,minNeighbors= 5)
 
             output2 = []
+            returnData[str(selectClassifier).split('.')[0]] = 0
             
             if len(output) != 0:
                 
                 for (x, y, w, h) in output :
                     if h*2 > img.shape[0] and w*2 > img.shape[1]:
+                            
+                        
+                        returnData[str(selectClassifier).split('.')[0]] +=1
                         output2.append((x,y,w,h))
                         # print((w,h))
                         cv2.rectangle(image, (x,y), (x+w,y+h), 0, 1)
                         # cv2.imshow('test',image)
                         # cv2.waitKey(0)
                         image = img
-                        returnData.append(str(selectClassifier.split('.')[0]))
-                        break
+                        # returnData.append(str(selectClassifier.split('.')[0]))
+                        
 
         return returnData
 
@@ -97,83 +101,101 @@ class multiCascade():
 
     def testCascade(self,feature):
         ''' test classifier by test data. '''	
-        keepData={}
-        keepDataAll = {}
-        for i in range(0,30): # 30 class
-            keepDataAll[str(self.listOfClass[i])]={}
-            for j in range(0,30): # inloop 30 class
-                keepDataAll[str(self.listOfClass[i])].update({str(self.listOfClass[j]):0})
         
-        summaryTP =0
-        summaryFP =0
-        summaryTN =0
-        summaryFN =0
+        for suffixSelect in [0] :# ['test','train','validate']
+            keepData={}
+            keepDataAll = {}
+            for i in range(0,30): # 30 class
+                keepDataAll[str(self.listOfClass[i])]={}
+                for j in range(0,30): # inloop 30 class
+                    keepDataAll[str(self.listOfClass[i])].update({str(self.listOfClass[j]):0})
+            
+            summaryTP =0
+            summaryFP =0
+            summaryTN =0
+            summaryFN =0
 
-        self.callClassifiers(feature=feature)
-        for j in range(0,30): # 30 class
-            object = self.listOfClass[j]
-            f = open('dataCompress'+self.dirCom+'dataset_'+str(object)+'_'+self.suffix[0]+'.txt','r')
-            image = str(f.read()).split('\n')[:-1]
-            f.close()
-            keepData[object] = 0			
-            print("test : " +str(object))
+            self.callClassifiers(feature=feature)
+            for j in range(0,30): # 30 class
+                object = self.listOfClass[j]
+                f = open('dataCompress'+self.dirCom+'dataset_'+str(object)+'_'+self.suffix[suffixSelect]+'.txt','r')
+                image = str(f.read()).split('\n')[:-1]
+                f.close()
+                keepData[object] = 0			
+
+                print("test : " +str(object))
 
 
-            for i in range(len(image)):
-                image[i] = np.fromstring(image[i], dtype=float, sep=',')
-                image[i] = np.array(image[i], dtype=np.uint8)*255
-                image[i] = np.reshape(image[i],(self.WHfromArray1D(len(image[i]))))
-                image[i] = cv2.resize(image[i],(int(self.testResizeH/self.scaleWeightHeight),int(self.testResizeH)))
+                for i in range(len(image)):
+                    image[i] = np.fromstring(image[i], dtype=float, sep=',')
+                    image[i] = np.array(image[i], dtype=np.uint8)*255
+                    image[i] = np.reshape(image[i],(self.WHfromArray1D(len(image[i]))))
+                    image[i] = cv2.resize(image[i],(int(self.testResizeH/self.scaleWeightHeight),int(self.testResizeH)))
 
-                if i%int(len(image)/10) == 0:
-                    print(str(int(i*100/len(image)))+'/100')
+                    if i%int(len(image)/10) == 0:
+                        print(str(int(i*100/len(image)))+'/100')
+                    
+                    detect = self.detectFromCascade(image=image[i],feature=feature)
+                    
+                    keepData[object]+=detect[str(object)]
+
+                    for obj in self.listOfClass:
+                        keepDataAll[str(object)][str(obj)] += int(detect[str(obj)])
+
+                # keepData[object] = int(keepData[object])*100/len(image)
+
+                # keepData[object] = (100*(len(keepDataAll[str(object)])-1)-sum(keepDataAll[str(object)].values())+2*keepData[object] )/len(keepDataAll[str(object)]) 
+                # keepData[object] = keepData[object]/sum(keepDataAll[str(object)].values())
+                # listDat = [ 1-(i/100) for i in keepDataAll[str(object)].values() if keepDataAll[str(object)][str(object)] != i ]
+                # keepData[object] = np.prod( listDat )*keepData[object]
+                print(keepDataAll[str(object)])
+                max_per_class = max( keepDataAll[str(object)].values() )
+                TP = keepDataAll[str(object)][str(object)]
+                FP = sum([ i for i in keepDataAll[str(object)].values() if i != keepDataAll[str(object)][str(object)] ])
+                TN = max_per_class*29 - FP
+                FN = max_per_class - TP
                 
-                detect = self.detectFromCascade(image=image[i],feature=feature)
+                '''*************************************************
+                *                                                  *
+                *          find accuracy recall & precision        *
+                *                                                  *
+                *************************************************'''
 
-                if str(object) in str(detect)  : # str(object[0]) == str(object) and len(object) == 1
-                    keepData[object]+=1
+                summaryTP += TP
+                summaryFP += FP
+                summaryTN += TN
+                summaryFN += FN
 
-                for dete in detect:
-                    keepDataAll[str(object)][str(dete)] +=1
+                precision = TP/(TP+FP)
+                recall = TP/(TP+TN)
+                accuracy = (TP+TN)/(TP+TN+FP+FN)
+                if (precision+recall != 0):
+                    print(precision+recall)
+                    f_score = 2*(precision*recall)/(precision+recall)
+                else : 
+                    f_score = 'inf'
+                print('test detect '+str(object))
+                print('FN TP FP TN :' +str((FN,TP,FP,TN)))
+                print('\t\tprecision \t:'+str(precision*100)+' %')
+                print('\t\trecall \t\t:'+str(recall*100)+' %')   
+                print('\t\taccuracy \t:'+str(accuracy*100)+' %')   
+                print('\t\tf score \t:'+str(f_score*100)+' %\n')
+                
+            summaryPrecision = summaryTP/(summaryTP+summaryFP)
+            summaryRecall = summaryTP/(summaryTP+summaryTN)
+            summaryAccuracy = (summaryTP+summaryTN)/(summaryTP+summaryTN+summaryFP+summaryFN)
+            if (summaryPrecision+summaryRecall != 0):
+                summaryF_score = 2*(summaryPrecision*summaryRecall)/(summaryPrecision+summaryRecall)
+            else:
+                summaryF_score = 'inf'
 
-            for kAll in self.listOfClass:
-                keepDataAll[str(object)][str(kAll)] = int(keepDataAll[str(object)][str(kAll)])
-
-            # keepData[object] = int(keepData[object])*100/len(image)
-
-            # keepData[object] = (100*(len(keepDataAll[str(object)])-1)-sum(keepDataAll[str(object)].values())+2*keepData[object] )/len(keepDataAll[str(object)]) 
-            keepData[object] = keepData[object]/sum(keepDataAll[str(object)].values())
-            # listDat = [ 1-(i/100) for i in keepDataAll[str(object)].values() if keepDataAll[str(object)][str(object)] != i ]
-            # keepData[object] = np.prod( listDat )*keepData[object]
-            TP = keepDataAll[str(object)][str(object)]
-            FP = sum([ i for i in keepDataAll[str(object)].values() if i != keepDataAll[str(object)][str(object)] ])
-            TN = len(image)*29 - FP
-            FN = len(image) - TP
-            
-            summaryTP += TP
-            summaryFP += FP
-            summaryTN += TN
-            summaryFN += FN
-
-            precision = TP/(TP+FP)
-            recall = TP/(TP+TN)
-            accuracy = (TP+TN)/(TP+TN+FP+FN)
-
-            print('test detect '+str(object)+' \n\t\tprecision \t:'+str(precision*100)+' %')
-
-            print('\t\trecall \t:'+str(recall*100)+' %')   
-            print('\t\taccuracy \t:'+str(accuracy*100)+' %\n')   
-            
-        summaryPrecision = summaryTP/(summaryTP+summaryFP)
-        summaryRecall = summaryTP/(summaryTP+summaryTN)
-        summaryAccuracy = (summaryTP+summaryTN)/(summaryTP+summaryTN+summaryFP+summaryFN)
-
-        print('summary \tprecision\t:'+str(summaryPrecision*100)+' %')
-        print('\t\trecall\t\t:'+str(summaryPrecision*100)+' %')
-        print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %\n')
-        
-        # print('summary accuracy :'+str(sum(keepData.values())/len(keepData))+' %')
-        # print(keepDataAll)
+            print('summary '+str(self.suffix[suffixSelect]))
+            print('\tprecision\t:'+str(summaryPrecision*100)+' %')
+            print('\t\trecall\t\t:'+str(summaryPrecision*100)+' %')
+            print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %')
+            print('\t\tf score \t:'+str(summaryF_score*100)+' %\n')
+            # print('summary accuracy :'+str(sum(keepData.values())/len(keepData))+' %')
+            # print(keepDataAll)
         return 0
 
     def copyCascadeFile(self,feature ):
