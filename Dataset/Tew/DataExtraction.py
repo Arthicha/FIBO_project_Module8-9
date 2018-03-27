@@ -62,6 +62,9 @@ for n in range(0,len(NUM)):
     num = NUM[n]
     for t in range(0,len(TYPE)):
         type = TYPE[t]
+        if (num != '9') or (type != 'T'):
+            continue
+
         process = 0
         for font in FONT:
 
@@ -83,8 +86,10 @@ for n in range(0,len(NUM)):
                 img = cv2.imread(filepath,0)
                 for x in range(img.shape[0],img.shape[1],img.shape[0]):
                     plate = img[:,x-img.shape[0]:x]
+
                     _, plate = cv2.threshold(plate, THRES, 255,0)
-                    plate = ip.get_plate(plate,IMG_SIZE)
+                    cv2.imshow('frame2',plate)
+                    plate = ip.get_plate(plate,IMG_SIZE,dilate=50)
                     plate = plate[0].UnrotateWord
                     stringy = np.array2string(((plate.ravel())).astype(int),max_line_width=int(IMG_SIZE[0]*IMG_SIZE[1]*(2*img.shape[1]/img.shape[0]))
                                               ,separator=',')
