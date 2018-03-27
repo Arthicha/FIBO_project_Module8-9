@@ -4,7 +4,7 @@ __program__ = 'dataset from jointed image'
 
 '''
 program description
-    this program will read set of jointed image and compress them in to text file. This program has 3 configure
+    this program reads set of jointed image and compress them in to text file. This program has 5 configuration
 parameters,
         1. DATASET_PATH: path of jointed image
         2. COMPRES_PATH: path to save text file
