@@ -49,6 +49,7 @@ DATASET = ['test','train','validate']
 IMG_SIZE = (60,30)
 THRES = 150
 
+
 print(PATH)
 
 # create directory

@@ -298,13 +298,12 @@ elif DATA is 'PROJECT':
         for j in range(10,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
-            image = str(f.read()).split('\n')[:100]
+            image = str(f.read()).split('\n')[:-1]
             f.close()
             delList = []
             for i in range(len(image)):
                 image[i] = np.fromstring(image[i], dtype=float, sep=',')
                 image[i] = np.array(image[i])
-
                 image[i] = np.reshape(image[i],(60*30))
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
