@@ -128,5 +128,3 @@ for n in range(0,len(NUM)):
 
             # increment variable
             process += 1
-
-
