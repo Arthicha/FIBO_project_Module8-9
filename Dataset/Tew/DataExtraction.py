@@ -51,6 +51,10 @@ THRES = 150
 
 print(PATH)
 
+# create directory
+if not os.path.exists(COMPRES_PATH):
+    os.makedirs(COMPRES_PATH)
+
 write = ''
 
 # loop through each font
