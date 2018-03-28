@@ -9,6 +9,7 @@
 import os
 import sys
 import platform
+from time import clock
 
 import numpy as np
 import cv2
@@ -65,7 +66,6 @@ class multiCascade():
         if self.multiClassifiers == []:
             self.callClassifiers(feature=feature)
         img = image
-
         returnData = {}
         for selectClassifier in list(self.multiClassifiers):
             if feature == 'HAAR':
@@ -93,7 +93,8 @@ class multiCascade():
                         # cv2.waitKey(0)
                         image = img
                         # returnData.append(str(selectClassifier.split('.')[0]))
-                        
+        
+        
 
         return returnData
 
@@ -115,6 +116,9 @@ class multiCascade():
             summaryTN =0
             summaryFN =0
 
+            imageCount = 0
+            tic = clock()
+            
             self.callClassifiers(feature=feature)
             for j in range(0,30): # 30 class
                 object = self.listOfClass[j]
@@ -122,10 +126,11 @@ class multiCascade():
                 image = str(f.read()).split('\n')[:-1]
                 f.close()
                 keepData[object] = 0			
+                imageCount += len(image)
+                tic_n = clock()
 
                 print("test : " +str(object))
-
-
+                
                 for i in range(len(image)):
                     image[i] = np.fromstring(image[i], dtype=float, sep=',')
                     image[i] = np.array(image[i], dtype=np.uint8)*255
@@ -148,7 +153,10 @@ class multiCascade():
                 # keepData[object] = keepData[object]/sum(keepDataAll[str(object)].values())
                 # listDat = [ 1-(i/100) for i in keepDataAll[str(object)].values() if keepDataAll[str(object)][str(object)] != i ]
                 # keepData[object] = np.prod( listDat )*keepData[object]
-                print(keepDataAll[str(object)])
+
+                toc_n = clock()
+
+                # print(keepDataAll[str(object)])
                 max_per_class = max( keepDataAll[str(object)].values() )
                 TP = keepDataAll[str(object)][str(object)]
                 FP = sum([ i for i in keepDataAll[str(object)].values() if i != keepDataAll[str(object)][str(object)] ])
@@ -174,13 +182,15 @@ class multiCascade():
                     f_score = 2*(precision*recall)/(precision+recall)
                 else : 
                     f_score = 'inf'
-                print('test detect '+str(object))
+                print('test detect '+str(object) + ' average time per image : '+str((toc_n-tic_n)/len(image)) + ' s')
                 print('FN TP FP TN :' +str((FN,TP,FP,TN)))
                 print('\t\tprecision \t:'+str(precision*100)+' %')
                 print('\t\trecall \t\t:'+str(recall*100)+' %')   
                 print('\t\taccuracy \t:'+str(accuracy*100)+' %')   
                 print('\t\tf score \t:'+str(f_score*100)+' %\n')
-                
+
+            toc = clock()
+
             summaryPrecision = summaryTP/(summaryTP+summaryFP)
             summaryRecall = summaryTP/(summaryTP+summaryTN)
             summaryAccuracy = (summaryTP+summaryTN)/(summaryTP+summaryTN+summaryFP+summaryFN)
@@ -189,7 +199,7 @@ class multiCascade():
             else:
                 summaryF_score = 'inf'
 
-            print('summary : '+str(self.suffix[suffixSelect]))
+            print('summary : '+str(self.suffix[suffixSelect]) + ' average time per image : '+ str((toc-tic)/imageCount ) + ' s')
             print('\t\tprecision\t:'+str(summaryPrecision*100)+' %')
             print('\t\trecall\t\t:'+str(summaryRecall*100)+' %')
             print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %')
