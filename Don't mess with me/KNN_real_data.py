@@ -174,7 +174,7 @@ test_new = modeltree.transform(test_hog_descriptors)
 feature = X_new
 target = lables
 print('Begining Knn fitting...')
-neigh = KNeighborsClassifier(n_neighbors=10)
+neigh = KNeighborsClassifier(n_neighbors=3)
 neigh.fit(X_new, lables)
 joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_gen.pkl')
 print('Model saved!')
@@ -184,3 +184,23 @@ print(pred.shape)
 print('Generate confusion matrix...')
 confusionMat(test_lables, pred)
 
+best_score=0
+all_hog_descriptors= [val_hog_descriptors,hog_descriptors,test_hog_descriptors]
+all_target =[val_lables,lables,test_lables]
+for i in range(0,2):
+        train_feature = all_hog_descriptors[i].tolist()+all_hog_descriptors[i+1].tolist()
+        train_target =  all_target[i].tolist()+all_target[i+1].tolist()
+        neigh.fit(train_feature, train_target)
+        train_score = neigh.score(train_feature, train_target)
+        print("train score :   " + str(train_score))
+        test_score = neigh.score(all_hog_descriptors[(i+2)%3].tolist(), all_target[(i+2)%3].tolist())
+        print("test score :   " + str(test_score))
+        Label_Pred = neigh.predict(all_hog_descriptors[(i+2)%3].tolist())
+        confusionMat(all_target[(i+2)%3].tolist(), Label_Pred)
+        print(classification_report( all_target[(i+2)%3].tolist(), Label_Pred))
+        if test_score > best_score:
+            best_score = test_score
+            s = neigh
+
+
+print('GENERATE DATA FILE')
