@@ -1,5 +1,5 @@
 __author__ = 'Zumo Arthicha Srisuchinnawong'
-__version__ = 3.0
+__version__ = 3.1
 __description__ = 'Main Program'
 
 
