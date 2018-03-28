@@ -32,13 +32,29 @@ import matplotlib.pyplot as plt
 
 '''*************************************************
 *                                                  *
-*                 global variable                  *
+*             configuration variable               *
 *                                                  *
 *************************************************'''
 
 N_CLASS = 30
 IMG_SIZE = (30,60)
+
+DATASET_DIR = '\\data0-9compress'
+MODEL_DIR = ''
+
+
+'''*************************************************
+*                                                  *
+*                 global variable                  *
+*                                                  *
+*************************************************'''
+
+# set numpy to print/show all every element in matrix
 np.set_printoptions(threshold=np.inf)
+
+PATH = os.getcwd()
+MODEL_PATH = PATH + MODEL_DIR
+
 
 eye = [Retinutella('front',1,0,1)]
 
@@ -47,10 +63,15 @@ eye = [Retinutella('front',1,0,1)]
 *                   main program                   *
 *                                                  *
 *************************************************'''
-
+closing = 3
 while(1):
-    image = eye[0].getListOfPlate()
-    print(image[0])
+    image = eye[0].getImage()
+    org = copy.deepcopy(image)
+    image = IP.binarize(image,method=IP.SAUVOLA_THRESHOLDING,value=15)
+    #image = IP.morph(image,mode=IP.CLOSING,value=[closing,closing])
+    plate = IP.get_plate(image,(60,30))[0].UnrotateWord
+    image = plate
+    eye[0].show(org,frame='original')
     eye[0].show(image,wait=10)
 
 eye[0].close()

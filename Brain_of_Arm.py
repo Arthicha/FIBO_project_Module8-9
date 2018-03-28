@@ -295,7 +295,7 @@ elif DATA is 'PROJECT':
                        'SevenTH','EightTH','NineTH']
     for s in range(2,3):
         print('STATUS: process data',str(100.0*s/3.0))
-        for j in range(10,N_CLASS):
+        for j in range(20,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
             image = str(f.read()).split('\n')[:100]
@@ -303,7 +303,7 @@ elif DATA is 'PROJECT':
             delList = []
             for i in range(len(image)):
                 image[i] = np.fromstring(image[i], dtype=float, sep=',')
-                image[i] = np.array(image[i])
+                image[i] = np.array(image[i])/255.0
                 image[i] = np.reshape(image[i],(60*30))
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -463,21 +463,21 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 *************************************************'''
 
                 # loop through each testing image
-                if 1:
+                if 0:
                     ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
                     image_indexy += 1
                     LoM = [np.reshape(ts,(30,60))]
 
                 # specified image
-                if 0:
-                    img = np.array(cv2.imread('twoTH.jpg',0))
+                if 1:
+                    img = np.array(cv2.imread('ThreeEN.jpg',0))
 
 
                     #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
                     img = cv2.resize(img,(30,60))
                     #img = IP.auto_canny(img)
 
-                    ret, img = cv2.threshold(img, 200, 255,0)
+                    #ret, img = cv2.threshold(img, 200, 255,0)
                     #imgr = (img//255)
                     #print('input',img)
 
@@ -487,15 +487,18 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     img = np.reshape(img,(60,30))'''
 
                     LoM = [img]
-                    print('input',LoM)
+                    #print('input',LoM)
 
                 # use image from camera
                 if 0:
                     pass
 
                 LoM = np.array(LoM)
+                LoM = LoM.astype(np.uint8)
                 LoC = copy.deepcopy(LoM)
-                LoC = LoC//255
+                print('LoC',LoC)
+                LoC = LoC/255.0
+                print('LoC',LoC)
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
 
 
@@ -527,7 +530,6 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
         if TENSOR_BOARD:
             writer.close()
-
         return accuracy.eval(feed_dict={x: validationSet[0], y_: validationSet[1], keep_prob: 1.0})
 
 
