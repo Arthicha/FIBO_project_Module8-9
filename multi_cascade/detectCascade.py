@@ -35,6 +35,7 @@ class multiCascade():
 
         self.scaleWeightHeight = 0.5
         self.testResizeH = 200
+        self.
 
         self.multiClassifiers = []
         self.listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six','seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
@@ -103,7 +104,7 @@ class multiCascade():
     def testCascade(self,feature):
         ''' test classifier by test data. '''	
         
-        for suffixSelect in [0] :# ['test','train','validate']
+        for suffixSelect in [0,2] :# ['test','train','validate']
             keepData={}
             keepDataAll = {}
             for i in range(0,30): # 30 class
@@ -129,7 +130,8 @@ class multiCascade():
                 imageCount += len(image)
                 tic_n = clock()
 
-                print("test : " +str(object))
+                # print head of class
+                # print("test : " +str(object))
                 
                 for i in range(len(image)):
                     image[i] = np.fromstring(image[i], dtype=float, sep=',')
@@ -137,8 +139,9 @@ class multiCascade():
                     image[i] = np.reshape(image[i],(self.WHfromArray1D(len(image[i]))))
                     image[i] = cv2.resize(image[i],(int(self.testResizeH/self.scaleWeightHeight),int(self.testResizeH)))
 
-                    if i%int(len(image)/10) == 0:
-                        print(str(int(i*100/len(image)))+'/100')
+                    # display percentage of class
+                    # if i%int(len(image)/10) == 0:
+                    #     print(str(int(i*100/len(image)))+'/100')
                     
                     detect = self.detectFromCascade(image=image[i],feature=feature)
                     
@@ -178,7 +181,6 @@ class multiCascade():
                 recall = TP/(TP+TN)
                 accuracy = (TP+TN)/(TP+TN+FP+FN)
                 if (precision+recall != 0):
-                    print(precision+recall)
                     f_score = 2*(precision*recall)/(precision+recall)
                 else : 
                     f_score = 'inf'
@@ -200,6 +202,7 @@ class multiCascade():
                 summaryF_score = 'inf'
 
             print('summary : '+str(self.suffix[suffixSelect]) + ' average time per image : '+ str((toc-tic)/imageCount ) + ' s')
+            print('FN TP FP TN :' +str((summaryFN,summaryTP,summaryFP,summaryTN)))
             print('\t\tprecision\t:'+str(summaryPrecision*100)+' %')
             print('\t\trecall\t\t:'+str(summaryRecall*100)+' %')
             print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %')

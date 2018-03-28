@@ -16,6 +16,7 @@ from time import sleep
 from PIL import Image, ImageOps
 from math import sqrt, pow
 import numpy as np
+import cv2
 
 
 '''*************************************************
@@ -28,7 +29,10 @@ dirCom = '/'
 scaleWeightHeight = 0.5
 scalePosNeg = 1
 memoryUse = 8192
+multiPos = 2
 
+kernelSize = 4
+postProcessList = ['erosion','dilation','opening','closing','gradient','filter2d','blur','medianBlur','bilateralFilter']
 listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
                 'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
                 'SevenTH','EightTH','NineTH']
@@ -49,7 +53,7 @@ WHfromArray1D = lambda arraySize : ( int(sqrt(arraySize*scaleWeightHeight)), int
 *************************************************'''
 
 def main():
-    global dirCom, weight, height, listOfClass 
+    global dirCom, weight, height, listOfClass , postProcessList
     inputKey = sys.argv[1:]
     
     if platform.system() == 'Linux':
@@ -288,17 +292,15 @@ def create_bg_txt(select_value):
     *                                                  *
     *************************************************'''
 
-
     countPos =0
     countNeg =0
     if str(select_value) in str(listOfClass):
+
         for f in randomList:
             if str(f.split('_')[0]) == str(select_value):
                 f_pos.write("data"+dirCom+f+"\n")
                 countPos+=1
-            # else:
-            #     f_neg.write("data"+dirCom+f+"\n")
-            #     countNeg+=1
+
         countNegs = int(countPos/len(listOfClass))*len(listOfClass) * scalePosNeg
         
         keepList = []
@@ -314,8 +316,6 @@ def create_bg_txt(select_value):
         for selectList in keepList:
             f_neg.write(selectList)
                    
-    
-
 
     else:
         sys.exit('out of class')
@@ -367,7 +367,9 @@ def AutoGenerateClassification(numberPerClass=1000, main_img='train-0',size=24, 
     if str(state) == 'repackage' :
         print('gen_image '+str(numberPerClass)+' per class')
         generate_picture(limitFilePerClass = numberPerClass)
-        print('done')
+        print('done\npostprocess')
+        imagePostProcess(mainImage=str(main_img)+'.png',posMultiply=multiPos)
+        print('done\nresize')
         resize_image(selectFile=str(main_img)+'.png',size=size)
     
     for selectClass in listOfClass:
@@ -422,6 +424,65 @@ def predictNumPosNumNeg(countPos,countNeg):
     
 
     return [pos,neg]
+
+def imagePostProcess(mainImage='',posMultiply=1):
+    '''post process for multiply positive image'''
+          
+    '''*************************************************
+    *                                                  *
+    *          post process with random feature        *
+    *                                                  *
+    *************************************************'''
+    
+    path = 'dataExtract'
+    fileList= [f for f in os.listdir(path) if str(f).split('_')[1] != mainImage]
+    kernel = np.ones((kernelSize,kernelSize),np.uint8)
+    kernel_float = np.ones((kernelSize,kernelSize),np.float32)/(pow(kernelSize,2))
+
+    if posMultiply-1 == 0:
+        return 0
+    else :
+        if posMultiply > len(postProcessList):
+            posMultiply = len(postProcessList)
+        
+        for i in range(posMultiply):
+            process = choice(postProcessList)
+            postProcessList.remove(process)
+            print('process feature:'+str(process))
+            for f in fileList:
+                img = cv2.imread(path+dirCom+f,0)
+                
+                if process == 'erosion' :
+                    img = cv2.erode(img, kernel, iterations= 1)
+
+                elif process == 'dilation' :
+                    img = cv2.dilate(img, kernel, iterations= 1)
+
+                elif process == 'opening' :
+                    img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+
+                elif process == 'closing' :
+                    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+
+                elif process == 'gradient' :
+                    img = cv2.morphologyEx(img, cv2.MORPH_GRADIENT, kernel)
+
+                elif process == 'filter2d' :
+                    img = cv2.filter2d(img, -1 , kernel_float)
+
+                elif process == 'blur' :
+                    img = cv2.blur(img,(kernelSize,kernelSize))
+
+                elif process == 'gaussianBlur' :
+                    img = cv2.GaussianBlur(img,(kernelSize,kernelSize),1)
+
+                elif process == 'medianBlur' :
+                    img = cv2.medianBlur(img,kernelSize)
+
+                elif process == 'bilateralFilter' :
+                    img = cv2.bilateralFilter(img,2*kernelSize-1,75,75)
+                
+                cv2.imwrite('dataExtract'+dirCom+str(f).split('-')[0] +'-postPro-'+str(process)+str(f).split('-')[1],img)
 
 if __name__ == '__main__':
     main()
