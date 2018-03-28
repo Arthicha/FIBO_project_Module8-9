@@ -6,17 +6,18 @@ import os
 area_thresh = 35
 current_dir = os.getcwd()
 print(current_dir)
-filelist = [x for x in listdir(current_dir + "\\Augmented_dataset\\") if x[-4:] == ".txt"]
+filelist = [x for x in listdir(current_dir + "\\compress_dataset\\") if x[-4:] == ".txt"]
 # print(filelist)
 dataset_outer = []
 for file in filelist:
-    f = open(current_dir + "\\Augmented_dataset\\" + file, 'r')
+    f = open(current_dir + "\\compress_dataset\\" + file, 'r')
     data = f.read()
     # print(len(data))
     f.close()
     data = data.split('\n')[:-1]
     print(len(data))
-    data = list(map(lambda x: (1 - (np.array(x.split(',')).reshape(-1, (60))).astype(np.uint8)) * 255, data))
+    data = list(map(lambda x:  255-np.array(x.split(',')).reshape(-1, (60)).astype(np.uint8) * 255, data))
+
     for_render = data
     '''pre process image with erode and dilate'''
     # data = list(map(lambda x: cv2.medianBlur(x, 11), data))
@@ -24,6 +25,10 @@ for file in filelist:
     # a
     # data = list(map(lambda x: cv2.erode(x, np.ones([1, 4])), data))
     if "EightTH" in file:
+        # for m in for_render:
+        #     cv2.imshow("lol",m)
+        #     cv2.waitKey(100)
+        print()
         pass
     # for i in data:
     #         img = cv2.cvtColor(255-i,cv2.COLOR_GRAY2BGR)
@@ -106,11 +111,12 @@ for file in filelist:
     dataset_outer += list(map(lambda x: [len(x)], suckma))
     # dataset_inner=list(map(lambda y:len(y),dataset_inner))
     # dataset_all =list(map(lambda z:len(z[1]),data))
-    possibility_x = set(dataset_outer)
+    lensin =list(map(lambda x: len(x), suckma))
+    possibility_x = set(list(map(lambda x: len(x), suckma)))
     # possibility_y= set(dataset_inner)
     # possibility_z= set(dataset_all)
     for i in possibility_x:
-        print(str(i) + "  : " + str(dataset_outer.count(i) / len(dataset_outer)))
+        print(str(i) + "  : " + str(lensin.count(i) / len(suckma)))
     print(" space ")
     # for i in possibility_y:
     #     print(str(i)+"  : "+str(dataset_inner.count(i)/len(dataset_outer)))
