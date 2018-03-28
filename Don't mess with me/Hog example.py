@@ -8,7 +8,7 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import confusion_matrix
 import pandas as pd
 
-def confusionMat(correct_Labels, Predicted_Labels):
+def confusionMat(correct_Labels, Predicted_Labels ,excel_file_name):
     label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ZeroTH', 'OneTH', 'TwoTH', 'ThreeTH', 'FourTH', 'FiveTH', 'SixTH', 'SevenTH', 'EightTH', 'NineTH']
     con_mat = confusion_matrix(correct_Labels, Predicted_Labels,labels=label)
     print(con_mat)
@@ -21,7 +21,7 @@ def confusionMat(correct_Labels, Predicted_Labels):
         print('Class accuracy '+str(i)+': '+str(con_mat[i, i] / float(np.sum(con_mat[i, :]))))
     print('total_accuracy : ' + str(total_pres/float(np.sum(con_mat))))
     df = pd.DataFrame (con_mat)
-    filepath = 'Real_log.xlsx'
+    filepath = excel_file_name
     df.to_excel(filepath, index=False)
 #correct_lables = matrix of true class of the test data
 #Predicted_labels = matrix of the predicted class
@@ -165,4 +165,4 @@ pred = neigh.predict(test_new)
 print('predicted....')
 print(pred.shape)
 print('Generate confusion matrix...')
-confusionMat(test_lables, pred)
+confusionMat(test_lables, pred,'Real_log.xlsx')
