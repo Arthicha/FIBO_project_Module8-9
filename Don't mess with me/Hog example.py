@@ -9,7 +9,8 @@ from sklearn.metrics import confusion_matrix
 
 
 def confusionMat(correct_Labels, Predicted_Labels):
-    con_mat = confusion_matrix(correct_Labels, Predicted_Labels)
+    label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ZeroTH', 'OneTH', 'TwoTH', 'ThreeTH', 'FourTH', 'FiveTH', 'SixTH', 'SevenTH', 'EightTH', 'NineTH']
+    con_mat = confusion_matrix(correct_Labels, Predicted_Labels,labels=label)
     print(con_mat)
     print(con_mat.shape)
     siz = con_mat.shape
@@ -25,7 +26,6 @@ def confusionMat(correct_Labels, Predicted_Labels):
 def showPic(img):
     cv2.imshow("show",img)
     cv2.waitKey(0)
-#chg
 
 def deskew(img):
     m = cv2.moments(img)
@@ -76,6 +76,8 @@ hog_descriptors = []
 lables = []
 test_hog_descriptors = []
 test_lables = []
+val_hog_descriptors = []
+val_lables = []
 path = 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'
 dirs = os.listdir(path)
 
@@ -119,13 +121,31 @@ for files in dirs:
             test_hog_descriptors.append(hog.compute(img,winStride=(20,20)))
             test_lables.append(str(labs))
         print('appended test '+str(files))
+    if d == 'validate.txt':
+        labs = a[len(a)-2]
+        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'+str(files),'r')
+        data = director.read()
+        director.close()
+        data=data.split('\n')
+        data=data[:-1]
+        num =0
+        for x in data:
+            lisss=x.split(',')
+            img = np.array(list(lisss[:]))
+            img = img.reshape(-1,(60))
+            img = img.astype(np.uint8)*255
+            num += 1
+            img = deskew(img)
+            val_hog_descriptors.append(hog.compute(img,winStride=(20,20)))
+            val_lables.append(str(labs))
+        print('appended test '+str(files))
 hog_descriptors = np.squeeze(hog_descriptors)
 lables = np.squeeze(lables)
-print(lables)
 test_hog_descriptors = np.squeeze(test_hog_descriptors)
 test_lables = np.squeeze(test_lables)
-print(test_lables)
-print(hog_descriptors.shape)
+val_hog_descriptors = np.squeeze(val_hog_descriptors)
+val_lables = np.squeeze(val_lables)
+
 print('Begining feature selection...')
 #feature selection
 forest = ExtraTreesClassifier()
