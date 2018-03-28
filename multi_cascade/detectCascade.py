@@ -189,9 +189,9 @@ class multiCascade():
             else:
                 summaryF_score = 'inf'
 
-            print('summary '+str(self.suffix[suffixSelect]))
-            print('\tprecision\t:'+str(summaryPrecision*100)+' %')
-            print('\t\trecall\t\t:'+str(summaryPrecision*100)+' %')
+            print('summary : '+str(self.suffix[suffixSelect]))
+            print('\t\tprecision\t:'+str(summaryPrecision*100)+' %')
+            print('\t\trecall\t\t:'+str(summaryRecall*100)+' %')
             print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %')
             print('\t\tf score \t:'+str(summaryF_score*100)+' %\n')
             # print('summary accuracy :'+str(sum(keepData.values())/len(keepData))+' %')

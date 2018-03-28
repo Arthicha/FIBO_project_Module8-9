@@ -26,7 +26,7 @@ import numpy as np
 
 dirCom = '/'
 scaleWeightHeight = 0.5
-scalePosNeg = 3
+scalePosNeg = 1
 memoryUse = 8192
 
 listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
