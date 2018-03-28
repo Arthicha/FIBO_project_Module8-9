@@ -22,6 +22,7 @@ import random
 
 # display module
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
 
 # system module
 import os
@@ -135,6 +136,20 @@ MULTI_COLUMN = 1
 *                   function                       *
 *                                                  *
 *************************************************'''
+
+def confusionMat(correct_Labels, Predicted_Labels):
+    con_mat = confusion_matrix(correct_Labels, Predicted_Labels)
+    print(con_mat)
+    print(con_mat.shape)
+    siz = con_mat.shape
+    size = siz[0]
+    total_pres = 0
+    for i in range(size):
+        total_pres = total_pres + (con_mat[i, i])
+        print('Class accuracy '+str(i)+': '+str(con_mat[i, i] / float(np.sum(con_mat[i, :]))))
+    print('total_accuracy : ' + str(total_pres/float(np.sum(con_mat))))
+#correct_lables = matrix of true class of the test data
+#Predicted_labels = matrix of the predicted class
 
 def checkOreantation(img):
 
@@ -293,9 +308,9 @@ elif DATA is 'PROJECT':
     listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
                        'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
                        'SevenTH','EightTH','NineTH']
-    for s in range(2,3):
+    for s in range(0,1):
         print('STATUS: process data',str(100.0*s/3.0))
-        for j in range(20,N_CLASS):
+        for j in range(0,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
             image = str(f.read()).split('\n')[:100]
@@ -327,8 +342,8 @@ if DATA is 'MNIST':
     trainingSet = [mnist.train.images,mnist.train.labels]
     validationSet = [mnist.validation.images,mnist.validation.labels]
 elif DATA is 'PROJECT':
-    testingSet  = [TestTrainValidate[2],LabelTTT[2]]
-    validationSet = [TestTrainValidate[2],LabelTTT[2]]
+    testingSet  = [TestTrainValidate[0],LabelTTT[0]]
+    validationSet = [TestTrainValidate[0],LabelTTT[0]]
 
 def randint(min,max):
     return ran.randint(min,max)
@@ -469,7 +484,7 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     LoM = [np.reshape(ts,(30,60))]
 
                 # specified image
-                if 1:
+                if 0:
                     img = np.array(cv2.imread('ThreeEN.jpg',0))
 
 
@@ -493,12 +508,16 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 if 0:
                     pass
 
+                if 1:
+                    ts = np.array(testingSet[0])*255
+
+                    LoM = np.reshape(ts,(-1,30,60))
+                    print(LoM.shape)
+
                 LoM = np.array(LoM)
                 LoM = LoM.astype(np.uint8)
                 LoC = copy.deepcopy(LoM)
-                print('LoC',LoC)
                 LoC = LoC/255.0
-                print('LoC',LoC)
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
 
 
@@ -513,7 +532,9 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 if 1:
                     print('prob',y_pred.eval(feed_dict={x: LoC, keep_prob: 1.0}))
                     LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
-
+                    conf = confusionMat(testingSet[1],LoC)
+                    print(conf)
+                    input('>>>')
 
                 for i in range(0,len(LoM)):
                     LoMi = cv2.resize(LoM[i],(300,150))
