@@ -19,6 +19,7 @@ import numpy as np
 import math
 import random as ran
 import random
+import itertools
 
 # display module
 import matplotlib.pyplot as plt
@@ -138,9 +139,44 @@ MULTI_COLUMN = 1
 *                                                  *
 *************************************************'''
 
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
 def confusionMat(correct_Labels, Predicted_Labels):
     labels = range(0,30)#['0','1','2','3','4','5','6','7','8','9','zero','one','two','three','four','five','six','seven','eight','nine','ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
-
+    plt.figure()
+    np.set_printoptions(precision=2)
     con_mat = confusion_matrix(correct_Labels, Predicted_Labels,labels=labels)
     print(con_mat)
     print(con_mat.shape)
@@ -152,8 +188,11 @@ def confusionMat(correct_Labels, Predicted_Labels):
         print('Class accuracy '+str(i)+': '+str(con_mat[i, i] / float(np.sum(con_mat[i, :]))))
     print('total_accuracy : ' + str(total_pres/float(np.sum(con_mat))))
     df = pd.DataFrame (con_mat)
-    filepath = 'my_excel_file_PIC.xlsx'
+    filepath = 'D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\my_excel_file_PIC.xlsx'
+    plot_confusion_matrix(con_mat, classes=labels,
+                      title='Confusion matrix, without normalization')
     df.to_excel(filepath, index=False)
+    plt.show()
 #correct_lables = matrix of true class of the test data
 #Predicted_labels = matrix of the predicted class
 
