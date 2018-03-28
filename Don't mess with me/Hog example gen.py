@@ -21,7 +21,7 @@ def confusionMat(correct_Labels, Predicted_Labels):
         print('Class accuracy '+str(i)+': '+str(con_mat[i, i] / float(np.sum(con_mat[i, :]))))
     print('total_accuracy : ' + str(total_pres/float(np.sum(con_mat))))
     df = pd.DataFrame (con_mat)
-    filepath = 'Real_log.xlsx'
+    filepath = 'Gen_log.xlsx'
     df.to_excel(filepath, index=False)
 #correct_lables = matrix of true class of the test data
 #Predicted_labels = matrix of the predicted class
@@ -81,7 +81,7 @@ test_hog_descriptors = []
 test_lables = []
 val_hog_descriptors = []
 val_lables = []
-path = 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\compress_dataset\\'
+path = 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'
 dirs = os.listdir(path)
 
 #Import test and training data
@@ -90,7 +90,7 @@ for files in dirs:
     d = a[len(a)-1]
     if d == 'train.txt':
         lab = a[len(a)-2]
-        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\compress_dataset\\'+str(files),'r')
+        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'+str(files),'r')
         data = director.read()
         director.close()
         data=data.split('\n')
@@ -108,7 +108,7 @@ for files in dirs:
         print('appended train '+str(files))
     if d == 'test.txt':
         labs = a[len(a)-2]
-        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\compress_dataset\\'+str(files),'r')
+        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'+str(files),'r')
         data = director.read()
         director.close()
         data=data.split('\n')
@@ -118,7 +118,7 @@ for files in dirs:
             lisss=x.split(',')
             img = np.array(list(lisss[:]))
             img = img.reshape(-1,(60))
-            img = img.astype(np.uint8)
+            img = img.astype(np.uint8)*255
             num += 1
             img = deskew(img)
             test_hog_descriptors.append(hog.compute(img,winStride=(20,20)))
@@ -126,7 +126,7 @@ for files in dirs:
         print('appended test '+str(files))
     if d == 'validate.txt':
         labs = a[len(a)-2]
-        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\compress_dataset\\'+str(files),'r')
+        director = open('C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\'+str(files),'r')
         data = director.read()
         director.close()
         data=data.split('\n')
@@ -136,7 +136,7 @@ for files in dirs:
             lisss=x.split(',')
             img = np.array(list(lisss[:]))
             img = img.reshape(-1,(60))
-            img = img.astype(np.uint8)
+            img = img.astype(np.uint8)*255
             num += 1
             img = deskew(img)
             val_hog_descriptors.append(hog.compute(img,winStride=(20,20)))
@@ -159,7 +159,7 @@ test_new = modeltree.transform(test_hog_descriptors)
 print('Begining Knn fitting...')
 neigh = KNeighborsClassifier(n_neighbors=10)
 neigh.fit(X_new, lables)
-joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_real.pkl')
+joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_gen.pkl')
 print('Model saved!')
 pred = neigh.predict(test_new)
 print('predicted....')
