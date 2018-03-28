@@ -63,7 +63,7 @@ eye = [Retinutella('front',1,0,1)]
 *                   main program                   *
 *                                                  *
 *************************************************'''
-closing = 3
+'''closing = 3
 while(1):
     image = eye[0].getImage()
     org = copy.deepcopy(image)
@@ -74,7 +74,7 @@ while(1):
     eye[0].show(org,frame='original')
     eye[0].show(image,wait=10)
 
-eye[0].close()
+eye[0].close()'''
 
 '''*************************************************
 *                                                  *
