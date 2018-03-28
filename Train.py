@@ -112,7 +112,7 @@ NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
 KERNEL_SIZE = [[7,7],[7,7],[7,7],[5,5],[5,5]]
 POOL_SIZE = [[4,4],[2,2],[2,2],None,[2,2]]
-STRIDE_SIZE = [4,2,2,0,2]
+STRIDE_SIZE = [4,2,2,2,2]
 
 BATCH_SIZE = 2000
 
