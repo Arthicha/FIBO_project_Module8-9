@@ -103,16 +103,16 @@ if DATA is 'MNIST':
     imgSize = [28,28] # size of image
     N_CLASS = 10
 elif DATA is 'PROJECT':
-    imgSize = [30,60]
+    imgSize = [64,128]
     N_CLASS = 30
 
 
-CNN_HIDDEN_LAYER = [32,64,128,256,512,512] #amount of layer > 3
+CNN_HIDDEN_LAYER = [36,64,128,256,512,512] #amount of layer > 3
 NN_HIDDEN_LAYER = [1,1]
 AE_HIDDEN_LAYER = [imgSize[0]*imgSize[1],100,50,3,50,100,imgSize[0]*imgSize[1]]
-KERNEL_SIZE = [[5,5],[5,5],[3,3],[3,3],[3,3]]
-POOL_SIZE = [[2,2],None,[3,3],None,None]
-STRIDE_SIZE = [2,0,3,0,0]
+KERNEL_SIZE = [[7,7],[7,7],[7,7],[5,5],[5,5]]
+POOL_SIZE = [[4,4],[2,2],[2,2],None,[2,2]]
+STRIDE_SIZE = [4,2,2,2,2]
 
 BATCH_SIZE = 2000
 
@@ -158,7 +158,7 @@ elif DATA is 'PROJECT':
             for i in range(len(image)):
                 image[i] = np.fromstring(image[i], dtype=float, sep=',')
                 image[i] = np.array(image[i])
-                image[i] = np.reshape(image[i],(60*30))
+                image[i] = np.reshape(image[i],(imgSize[1]*imgSize[0]))
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             obj[j] = 1

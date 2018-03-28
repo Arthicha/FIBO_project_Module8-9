@@ -225,7 +225,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         image.text(((__class__.CREATE_SHAPE[0] - w) / 2, (__class__.CREATE_SHAPE[1] - h) / 2), string, font=Text_Font,
                    fill="black")
         img = np.array(img)
-        cv2.rectangle(img, (60, 60), (__class__.CREATE_SHAPE[0] - 60, __class__.CREATE_SHAPE[1] - 60), 0, thickness=2)
+        cv2.rectangle(img, (60, 60), (__class__.CREATE_SHAPE[0] - 60, __class__.CREATE_SHAPE[1] - 60), 0, thickness=4)
         return img
 
     def distorse(img, function=None, axis='x', alpha=1.0, beta=1.0):

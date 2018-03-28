@@ -19,9 +19,12 @@ import numpy as np
 import math
 import random as ran
 import random
+import itertools
 
 # display module
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import pandas as pd
 
 # system module
 import os
@@ -135,6 +138,63 @@ MULTI_COLUMN = 1
 *                   function                       *
 *                                                  *
 *************************************************'''
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+def confusionMat(correct_Labels, Predicted_Labels):
+    labels = range(0,30)#['0','1','2','3','4','5','6','7','8','9','zero','one','two','three','four','five','six','seven','eight','nine','ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
+    plt.figure()
+    np.set_printoptions(precision=2)
+    con_mat = confusion_matrix(correct_Labels, Predicted_Labels,labels=labels)
+    print(con_mat)
+    print(con_mat.shape)
+    siz = con_mat.shape
+    size = siz[0]
+    total_pres = 0
+    for i in range(size):
+        total_pres = total_pres + (con_mat[i, i])
+        print('Class accuracy '+str(i)+': '+str(con_mat[i, i] / float(np.sum(con_mat[i, :]))))
+    print('total_accuracy : ' + str(total_pres/float(np.sum(con_mat))))
+    df = pd.DataFrame (con_mat)
+    filepath = 'D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\my_excel_file_PIC.xlsx'
+    plot_confusion_matrix(con_mat, classes=labels,
+                      title='Confusion matrix, without normalization')
+    df.to_excel(filepath, index=False)
+    plt.show()
+#correct_lables = matrix of true class of the test data
+#Predicted_labels = matrix of the predicted class
 
 def checkOreantation(img):
 
@@ -293,9 +353,9 @@ elif DATA is 'PROJECT':
     listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
                        'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
                        'SevenTH','EightTH','NineTH']
-    for s in range(2,3):
+    for s in range(0,1):
         print('STATUS: process data',str(100.0*s/3.0))
-        for j in range(10,N_CLASS):
+        for j in range(0,N_CLASS):
             object = listOfClass[j]
             f = open('data0-9compress\\dataset_'+str(object)+'_'+suffix[s]+'.txt','r')
             image = str(f.read()).split('\n')[:100]
@@ -303,7 +363,7 @@ elif DATA is 'PROJECT':
             delList = []
             for i in range(len(image)):
                 image[i] = np.fromstring(image[i], dtype=float, sep=',')
-                image[i] = np.array(image[i])
+                image[i] = np.array(image[i])/255.0
                 image[i] = np.reshape(image[i],(60*30))
             TestTrainValidate[s] += image
             obj = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -327,8 +387,8 @@ if DATA is 'MNIST':
     trainingSet = [mnist.train.images,mnist.train.labels]
     validationSet = [mnist.validation.images,mnist.validation.labels]
 elif DATA is 'PROJECT':
-    testingSet  = [TestTrainValidate[2],LabelTTT[2]]
-    validationSet = [TestTrainValidate[2],LabelTTT[2]]
+    testingSet  = [TestTrainValidate[0],LabelTTT[0]]
+    validationSet = [TestTrainValidate[0],LabelTTT[0]]
 
 def randint(min,max):
     return ran.randint(min,max)
@@ -463,21 +523,21 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 *************************************************'''
 
                 # loop through each testing image
-                if 1:
+                if 0:
                     ts = np.array(testingSet[0][(image_indexy)%len(testingSet[0])])*255
                     image_indexy += 1
                     LoM = [np.reshape(ts,(30,60))]
 
                 # specified image
                 if 0:
-                    img = np.array(cv2.imread('twoTH.jpg',0))
+                    img = np.array(cv2.imread('ThreeEN.jpg',0))
 
 
                     #img = IP.binarize(img,method=IP.SAUVOLA_THRESHOLDING,value=31)
                     img = cv2.resize(img,(30,60))
                     #img = IP.auto_canny(img)
 
-                    ret, img = cv2.threshold(img, 200, 255,0)
+                    #ret, img = cv2.threshold(img, 200, 255,0)
                     #imgr = (img//255)
                     #print('input',img)
 
@@ -487,15 +547,21 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     img = np.reshape(img,(60,30))'''
 
                     LoM = [img]
-                    print('input',LoM)
+                    #print('input',LoM)
 
                 # use image from camera
                 if 0:
                     pass
 
+                if 1:
+                    ts = np.array(testingSet[0])*255
+
+                    LoM = np.reshape(ts,(-1,30,60))
+
                 LoM = np.array(LoM)
+                LoM = LoM.astype(np.uint8)
                 LoC = copy.deepcopy(LoM)
-                LoC = LoC//255
+                LoC = LoC/255.0
                 LoC = np.reshape(LoC,(LoC.shape[0],30*60))
 
 
@@ -511,6 +577,12 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     print('prob',y_pred.eval(feed_dict={x: LoC, keep_prob: 1.0}))
                     LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
 
+                    tes = np.array(testingSet[1])
+                    tes = tes.argmax(axis=1)
+                    print(tes)
+                    conf = confusionMat(tes,np.array(LoC))
+                    print(conf)
+                    input('>>>')
 
                 for i in range(0,len(LoM)):
                     LoMi = cv2.resize(LoM[i],(300,150))
@@ -527,7 +599,6 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
 
         if TENSOR_BOARD:
             writer.close()
-
         return accuracy.eval(feed_dict={x: validationSet[0], y_: validationSet[1], keep_prob: 1.0})
 
 

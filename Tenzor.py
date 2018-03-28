@@ -57,7 +57,7 @@ class TenzorCNN:
     def conv2d(self,x, W):
         return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
-    def CNN2(self,x,hidden_layer,kernel_size,pool_size,strides,image_size,keep_prob=1.0,input_drop=False):
+    def CNN2(self,x,hidden_layer,kernel_size,pool_size,strides,image_size,keep_prob=1.0,input_drop=False,fully=30):
         image_batch = x
         imgZ = image_size[0]*image_size[1]
         for i in range(0,len(hidden_layer)-1):
@@ -89,7 +89,7 @@ class TenzorCNN:
             # Add dropout operation; 0.8 probability that a neuron will be kept
             dropout = tf.layers.dropout(
                 inputs=dense, rate=keep_prob)
-        logits = tf.layers.dense(inputs=dropout, units=30)
+        logits = tf.layers.dense(inputs=dropout, units=fully)
         prob = tf.sigmoid(logits)
         return prob, [0,0] #self.conv_relu
 

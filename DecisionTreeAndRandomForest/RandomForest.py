@@ -27,14 +27,16 @@ Datapath = "C:\\Users\cha45\PycharmProjects\FIBO_project_Module8-9\Dataset\Tew\c
 '''Model Parameter setting'''
 N_ESTIMATOR = 20
 Data_used = 'Project_data'  # iris for scikit given data of flower
-                              # 'Project_data'to load data from text file
-MINIMUM_SAMPLES_SPLIT = 2  # The minimum number of samples required to split an internal node:
+                            # 'Project_data'to load data from text file
+Data_Sep = "Test_Train_Validate"           # for all data as one set used "None"
+                            # "Test_Train_Validate" for separating data according to Group 2 files Test train and validate will be collect in each parameter
+MINIMUM_SAMPLES_SPLIT = 2   # The minimum number of samples required to split an internal node:
                               # used float for percentage of all sample
                             # used int for exact number of sample
 # MIN_IMPURITY_DECREASE = 0        #default is 0
 multi_output = False
-N_SPLIT = 10
-Kfold_Type = "StratifiedShuffleSplit"
+N_SPLIT = 4
+Kfold_Type = "Stratified"
 TEST_AND_VALIDATE_PERCENT =0.4 # use float value from 1 -0
 
 
@@ -43,7 +45,7 @@ feature_selection = 'None'  # 'Tree_based' for tree
 Kbest= False
 Kbest_feature_left = 50
 
-
+#
 
 '''feature_extraction_parameter_setting'''
 RowOrColPerBar = 1
@@ -166,7 +168,45 @@ if Data_used == 'iris':
     feature = iris.data
     target = iris.target
     # iris_data = iris.data
-elif Data_used == 'Project_data':
+
+elif Data_used == "Project_data" and Data_Sep=="Test_Train_Validate":
+    hog = HOG_int()
+    feature_dictionary ={"test":[],"train":[],"validate":[]}
+    target_dictionary ={"test":[],"train":[],"validate":[]}
+    filelist = [x for x in os.listdir(Datapath) if x[-4:] == ".txt"]
+    feature = []
+    target = []
+    for i in filelist:
+        f = open(Datapath + i, 'r')
+        data = f.read()
+        f.close()
+        data = data.split('\n')[:-1]
+        target = [i.split('_')[1] for x in range(0, len(data))]
+        data = list(map(lambda x: np.array(x.split(',')).reshape(-1, (image_shape_x_axis)), data))
+        '''histogram_x'''
+        histogram_x = list(
+            map(lambda x: [x[:, y:y + RowOrColPerBar] for y in range(0, image_shape_x_axis, RowOrColPerBar)], data))
+        histogram_x = list(map(lambda x: list(map(lambda y: np.sum(y.astype(float)), x)), histogram_x))  # 1-
+        ''' normalization histogram x of each image '''
+        # histogram_x = list(map(lambda x: Histogram_normalize(x), histogram_x))
+        '''histogram_y'''
+        histogram_y = list(
+            map(lambda x: [x[y:y + RowOrColPerBar, :] for y in range(0, image_shape_y_axis, RowOrColPerBar)], data))
+        histogram_y = list(map(lambda x: list(map(lambda y: np.sum(y.astype(float)), x)), histogram_y))  # 1-
+        ''' normalization histogram x of each image '''
+        # histogram_y = list(map(lambda x: Histogram_normalize(x), histogram_y))
+        ''' hog '''
+        all_hog_perfile = list(map(lambda x: hog.compute(x.astype(np.uint8), winStride=(20, 20)), data))
+        '''change hog feature shape form (243,1) to (243,)'''
+        all_hog_perfile = list(map(lambda x: x.reshape((-1,)), all_hog_perfile))
+        '''combine all feature'''
+        all_feature = list(map(lambda x, y,z: np.concatenate([x, y,z]).tolist(), histogram_x, histogram_y,all_hog_perfile))
+        '''collect data'''
+        feature_dictionary[i[:-4].split('_')[2]]+=all_feature
+        target_dictionary[i[:-4].split('_')[2]]+=target
+        print(i)
+
+elif Data_used == 'Project_data' :
     hog = HOG_int()
     all_dataset_outer_number = []
     all_label = []
@@ -184,6 +224,7 @@ elif Data_used == 'Project_data':
         data = data.split('\n')[:-1]
         target = target + [i.split('_')[1] for x in range(0, len(data))]
         data = list(map(lambda x: np.array(x.split(',')).reshape(-1, (image_shape_x_axis)), data))
+
         '''histogram_x'''
         histogram_x = list(map(lambda x: [x[:, y:y + RowOrColPerBar] for y in range(0, image_shape_x_axis, RowOrColPerBar)], data))
         histogram_x = list(map(lambda x: list(map(lambda y: np.sum( y.astype(float)), x)), histogram_x))#1-
@@ -197,87 +238,20 @@ elif Data_used == 'Project_data':
         # Row = list(map(lambda x: np.array(find_chara_block(x, 0.35, 0)).tolist(), histogram_y))
         ''' hog '''
         all_hog_perfile = list(map(lambda x: hog.compute(x.astype(np.uint8), winStride=(20, 20)), data))
-        '''use hist y to find row'''
-        # Row = list(map(lambda x: [find_chara_block(x, 0.35, 0)], histogram_y))
-
-        # data_use_to_find_letter = list(map(lambda x: (1 - x.astype(np.uint8)) * 255, data))
-        # '''find contour and hierachy'''
-        # data_use_to_find_letter = list(
-        #     map(lambda x: cv2.findContours(x, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE),
-        #         data_use_to_find_letter))
-        #
-        # '''filter outer most hierachy (-1) '''
-        # hierachy = list(map(lambda x: x[2], data_use_to_find_letter))
-        # suckma = []
-        # n = 0
-        # blank = 0
-        # for m in data_use_to_find_letter:
-        #     n += 1
-        #     try:
-        #         hier = m[2][0].tolist()
-        #         con = []
-        #         for j in hier:
-        #             if j[3] == -1:
-        #                 rect = cv2.minAreaRect(m[1][hier.index(j)])
-        #                 M = cv2.moments(m[1][hier.index(j)])
-        #                 data_to_append = []
-        #                 try:
-        #                     cx = int(M['m10'] / M['m00'])
-        #                     if rect[0][0] > cx:
-        #                         data_to_append.append(1)
-        #                     elif rect[0][0] < cx:
-        #                         data_to_append.append(-1)
-        #                     else:
-        #                         data_to_append.append(0)
-        #                 except:
-        #                     data_to_append.append(0)
-        #                 try:
-        #                     cy = int(M['m01'] / M['m00'])
-        #                     if rect[0][1] > cy:
-        #                         data_to_append.append(1)
-        #                     elif rect[0][1] < cy:
-        #                         data_to_append.append(-1)
-        #                     else:
-        #                         data_to_append.append(0)
-        #                 except:
-        #                     data_to_append.append(0)
-        #                 if rect[1][0] * rect[1][1] > area_thresh:
-        #                     con.append(data_to_append)  # m[1][hier.index(j)]
-        #                     # con = [len(con)]+con+[[0,0] for sc in range(len(con),6)]
-        #     except:
-        #         blank += 1
-        #         print(blank)
-        #         con = []
-        #     suckma.append(con)
 
         ''' collect_data'''
-        # all_center += suckma
-        # all_dataset_outer_number += list(map(lambda x: [len(x)], suckma))
-        # suckma = list(map(lambda x:,suckma))
         all_histogram = list(map(lambda x, y: np.concatenate([x, y]), histogram_x, histogram_y))
-
         all_hog += all_hog_perfile
-        # all_row += Row
-        all_histogram_perfile += all_histogram
 
+        all_histogram_perfile += all_histogram
         # np.savetxt("project2\\histogram_"+file,all_histogram,fmt="%1.4f",delimiter=",")
         print(i)
-
-    # all_row = encoder(all_row)
-    # all_dataset_outer_number = encoder(all_dataset_outer_number)
-    '''change hof feature shape form (243,1) to (243,)'''
+    '''change hog feature shape form (243,1) to (243,)'''
     all_hog = list(map(lambda x: x.reshape((-1,)), all_hog))
     '''combine all feature'''
     feature= list(
         map(lambda w, x: np.concatenate([w, x]).tolist(), all_histogram_perfile, all_hog))#, y, z
-        # f = open(Datapath + i, 'r'), all_row,
-        #    all_dataset_outer_number
-        # data = f.read()
-        # f.close()
-        # data = data.split('\n')[:-1]
-        # data = list(map(lambda x: np.array(x.split(',')).reshape(90).astype(np.float64).tolist(), data))
-        # feature = feature + data
-        # target = target + [i.split('_')[2] for x in range(0, len(data))]
+
 else:
     raise NameError('No such data')
 
@@ -302,45 +276,68 @@ else:
 if Kbest:
     feature = SelectKBest(chi2, k=Kbest_feature_left).fit_transform(feature, target)
     print(feature.shape)
-if Kfold_Type == "StratifiedShuffleSplit":
-    skf = StratifiedShuffleSplit(n_splits=N_SPLIT,test_size=TEST_AND_VALIDATE_PERCENT)
-else:
-    skf = StratifiedKFold(n_splits=N_SPLIT)
+
+
+
 best_score = 0
 model = RandomForestClassifier(n_estimators=N_ESTIMATOR , max_depth=None,
                             min_samples_split=MINIMUM_SAMPLES_SPLIT, random_state=0)
 # if multi_output:
 #     splitted= skf.split(feature, dummy_target)
 # else:
-splitted = skf.split(feature, target)
+if Data_used== 'Project_data' and Data_Sep == "Test_Train_Validate":
+    key =[*feature_dictionary.keys()]
+    for i in range(0,len(key)-1):
+        train_feature = feature_dictionary[key[i]]+feature_dictionary[key[i+1]]
+        train_target =  target_dictionary[key[i]]+target_dictionary[key[i+1]]
+        model.fit(train_feature, train_target)
+        train_score = model.score(train_feature, train_target)
+        print("train score :   " + str(train_score))
+        test_score = model.score(feature_dictionary[key[(i+2)%3]], target_dictionary[key[(i+2)%3]])
+        print("test score :   " + str(test_score))
+        Label_Pred = model.predict(feature_dictionary[key[(i+2)%3]])
+        confusionMat(target_dictionary[key[(i+2)%3]], Label_Pred)
+        print(classification_report( target_dictionary[key[(i+2)%3]], Label_Pred))
+        if test_score > best_score:
+            best_score = test_score
+            s = model
 
-for train, test in splitted:
-    #    train
-    train_in_set = list(map(lambda x: feature[x], train))
-    train_target_set = list(map(lambda x: target[x], train))
-    test_validate_input_data = list(map(lambda x: feature[x], test))
-    test_validate_target_data = list(map(lambda x: target[x], test))
-    test_data, val_data, test_target, val_target = train_test_split(test_validate_input_data, test_validate_target_data,
-                                                                    test_size=0.5)
-    model.fit(train_in_set, train_target_set)
-    if multi_output:
-        for j in range(len(test_data)):
-            print(model.predict([test_data[j]]))
-    train_score = model.score(train_in_set, train_target_set)
-    print("train score :   " + str(train_score))
-    val_score = model.score(val_data, val_target)
-    print("validation score :   " + str(val_score))
-    test_score = model.score(test_data, test_target)
-    print("test score :   " + str(test_score))
-    scores = cross_val_score(model, test_validate_input_data, test_validate_target_data )
-    print("cross_val_score :   " + str(scores.mean()))
-    Label_Pred = model.predict(test_data)
-    # confusionMat(test_target,Label_Pred)
-    print(classification_report(test_target,Label_Pred))
-    if test_score > best_score:
-        best_score = test_score
-        s = model
-    print("best_score :   " + str(best_score))
-    print(model.feature_importances_)
+else:
+    if Kfold_Type == "StratifiedShuffleSplit":
+        skf = StratifiedShuffleSplit(n_splits=N_SPLIT,test_size=TEST_AND_VALIDATE_PERCENT)
+    else:
+        skf = StratifiedKFold(n_splits=N_SPLIT)
+    splitted = skf.split(feature, target)
 
+    for train, test in splitted:
+        #    train
+        train_in_set = list(map(lambda x: feature[x], train))
+        train_target_set = list(map(lambda x: target[x], train))
+        test_validate_input_data = list(map(lambda x: feature[x], test))
+        test_validate_target_data = list(map(lambda x: target[x], test))
+        test_data, val_data, test_target, val_target = train_test_split(test_validate_input_data, test_validate_target_data,
+                                                                        test_size=0.5)
+        model.fit(train_in_set, train_target_set)
+        if multi_output:
+            for j in range(len(test_data)):
+                print(model.predict([test_data[j]]))
+        train_score = model.score(train_in_set, train_target_set)
+        print("train score :   " + str(train_score))
+        val_score = model.score(val_data, val_target)
+        print("validation score :   " + str(val_score))
+        test_score = model.score(test_data, test_target)
+        print("test score :   " + str(test_score))
+        scores = cross_val_score(model, test_validate_input_data, test_validate_target_data )
+        print("cross_val_score :   " + str(scores.mean()))
+        Label_Pred = model.predict(test_data)
+        Prob_Pred = model.predict_proba(test_data)
+        # confusionMat(test_target,Label_Pred)
+        print(classification_report(test_target,Label_Pred))
+        print(Prob_Pred)
+        if test_score > best_score:
+            best_score = test_score
+            s = model
+        print("best_score :   " + str(best_score))
+        print(model.feature_importances_)
+pickle.dump(s, open("Random_Forest_best_run.sav", 'wb'))
 

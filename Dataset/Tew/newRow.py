@@ -6,7 +6,7 @@ import os
 
 current_dir = os.getcwd()
 print(current_dir)
-filelist = [x for x in listdir(current_dir + "\\Augmented_dataset\\") if x[-4:] == ".txt"]
+filelist = [x for x in listdir(current_dir + "\\compress_dataset\\") if x[-4:] == ".txt"]
 print(filelist)
 
 def find_chara_block(list_of_his,weight,minimum=2):
@@ -44,7 +44,7 @@ def find_chara_block(list_of_his,weight,minimum=2):
     return block
 
 for file in filelist:
-    f = open(current_dir + "\\Augmented_dataset\\" + file, 'r')
+    f = open(current_dir + "\\compress_dataset\\" + file, 'r')
     data = f.read()
     f.close()
     data = data.split('\n')[:-1]
@@ -60,7 +60,7 @@ for file in filelist:
     histogram_y = list(map(lambda x: list(map(lambda y:np.sum(1-y.astype(float)),x)),histogram_y))
     histogram_y = list(map(lambda x: np.array(x) / max(x), histogram_y))
 
-    histogram_y = list(map(lambda x: find_chara_block(x,0.35,0), histogram_y))
+    histogram_y = list(map(lambda x: find_chara_block(x,0.60,0), histogram_y))
     # ''' using convolution to smooth image'''
     # histogram_x = list(map(lambda x: np.convolve(x, np.array([ 1,1, 1, 1,1,1,1]),"same"), histogram_x))
     # ''' using scipy find peak'''
