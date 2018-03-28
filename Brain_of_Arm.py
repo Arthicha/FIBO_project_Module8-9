@@ -23,6 +23,7 @@ import random
 # display module
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+import pandas as pd
 
 # system module
 import os
@@ -138,7 +139,9 @@ MULTI_COLUMN = 1
 *************************************************'''
 
 def confusionMat(correct_Labels, Predicted_Labels):
-    con_mat = confusion_matrix(correct_Labels, Predicted_Labels)
+    labels = range(0,30)#['0','1','2','3','4','5','6','7','8','9','zero','one','two','three','four','five','six','seven','eight','nine','ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
+
+    con_mat = confusion_matrix(correct_Labels, Predicted_Labels,labels=labels)
     print(con_mat)
     print(con_mat.shape)
     siz = con_mat.shape
@@ -148,6 +151,9 @@ def confusionMat(correct_Labels, Predicted_Labels):
         total_pres = total_pres + (con_mat[i, i])
         print('Class accuracy '+str(i)+': '+str(con_mat[i, i] / float(np.sum(con_mat[i, :]))))
     print('total_accuracy : ' + str(total_pres/float(np.sum(con_mat))))
+    df = pd.DataFrame (con_mat)
+    filepath = 'my_excel_file_PIC.xlsx'
+    df.to_excel(filepath, index=False)
 #correct_lables = matrix of true class of the test data
 #Predicted_labels = matrix of the predicted class
 
@@ -512,7 +518,6 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                     ts = np.array(testingSet[0])*255
 
                     LoM = np.reshape(ts,(-1,30,60))
-                    print(LoM.shape)
 
                 LoM = np.array(LoM)
                 LoM = LoM.astype(np.uint8)
@@ -532,7 +537,11 @@ def main(model='CNN',aug=0,value=None,GETT_PATH = None,SAVE_PATH=None,MAIN_HIDDE
                 if 1:
                     print('prob',y_pred.eval(feed_dict={x: LoC, keep_prob: 1.0}))
                     LoC = pred_class.eval(feed_dict={x: LoC, keep_prob: 1.0})
-                    conf = confusionMat(testingSet[1],LoC)
+
+                    tes = np.array(testingSet[1])
+                    tes = tes.argmax(axis=1)
+                    print(tes)
+                    conf = confusionMat(tes,np.array(LoC))
                     print(conf)
                     input('>>>')
 
