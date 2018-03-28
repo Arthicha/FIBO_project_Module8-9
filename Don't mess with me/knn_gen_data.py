@@ -184,7 +184,7 @@ print(pred.shape)
 print('Generate confusion matrix...')
 confusionMat(test_lables, pred)
 
-print("***************Tew******************")
+
 best_score=0
 all_hog_descriptors= [val_hog_descriptors,hog_descriptors,test_hog_descriptors]
 all_target =[val_lables,lables,test_lables]
