@@ -10,7 +10,7 @@ import copy
 
 np.set_printoptions(threshold=np.inf)
 
-Main_Path = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\Dataset_notingit\\Tew\\"
+Main_Path = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\Dataset\\Tew\\"
 
 Font_Path = ["ENGFONT\\","ENGFONT\\","THFONT\\"]
 Word = ["NUM","EN","TH"]
@@ -18,10 +18,10 @@ Word = ["NUM","EN","TH"]
 
 
 
-Save_Path = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\Dataset_notingit\\Tew\\Augmented_dataset\\"
+Save_Path = "D:\\2560\\FRA361_Robot_Studio\\FIBO_project_Module8-9\\Dataset\\Tew\\Augmented_dataset\\"
 Font_Size = 32
 AUGMOUNT = 30
-Image_Shape = (60, 30)
+Image_Shape = (128, 64)
 MAGNIFY = [90,110]
 MORPH = [1,5]
 MOVE = [-3,3]
