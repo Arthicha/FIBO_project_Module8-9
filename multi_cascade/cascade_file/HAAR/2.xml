@@ -9,7 +9,7 @@
     <boostType>GAB</boostType>
     <minHitRate>9.9500000476837158e-01</minHitRate>
     <maxFalseAlarm>5.0000000000000000e-01</maxFalseAlarm>
-    <weightTrimRate>9.4999999999999996e-01</weightTrimRate>
+    <weightTrimRate>9.4999998807907104e-01</weightTrimRate>
     <maxDepth>1</maxDepth>
     <maxWeakCount>100</maxWeakCount></stageParams>
   <featureParams>
@@ -20,20 +20,32 @@
   <stages>
     <!-- stage 0 -->
     <_>
-      <maxWeakCount>1</maxWeakCount>
-      <stageThreshold>9.2307692766189575e-01</stageThreshold>
+      <maxWeakCount>2</maxWeakCount>
+      <stageThreshold>-3.6998510360717773e-01</stageThreshold>
       <weakClassifiers>
         <_>
           <internalNodes>
-            0 -1 0 8.3067961037158966e-02</internalNodes>
+            0 -1 0 9.4045147299766541e-02</internalNodes>
           <leafValues>
-            -1. 9.2307692766189575e-01</leafValues></_></weakClassifiers></_></stages>
+            -9.8582994937896729e-01 8.2075470685958862e-01</leafValues></_>
+        <_>
+          <internalNodes>
+            0 -1 1 -1.4690519869327545e-01</internalNodes>
+          <leafValues>
+            6.1584484577178955e-01 -9.7743111848831177e-01</leafValues></_></weakClassifiers></_></stages>
   <features>
     <_>
       <rects>
         <_>
-          7 5 12 8 -1.</_>
+          8 5 11 8 -1.</_>
         <_>
-          7 9 12 4 2.</_></rects>
+          8 9 11 4 2.</_></rects>
+      <tilted>0</tilted></_>
+    <_>
+      <rects>
+        <_>
+          12 8 20 6 -1.</_>
+        <_>
+          22 8 10 6 2.</_></rects>
       <tilted>0</tilted></_></features></cascade>
 </opencv_storage>
