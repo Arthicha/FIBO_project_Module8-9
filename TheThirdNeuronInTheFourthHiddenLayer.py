@@ -63,18 +63,18 @@ eye = [Retinutella('front',1,0,1)]
 *                   main program                   *
 *                                                  *
 *************************************************'''
-'''closing = 3
+closing = 3
 while(1):
     image = eye[0].getImage()
     org = copy.deepcopy(image)
     image = IP.binarize(image,method=IP.SAUVOLA_THRESHOLDING,value=15)
     #image = IP.morph(image,mode=IP.CLOSING,value=[closing,closing])
     plate = IP.get_plate(image,(60,30))[0].UnrotateWord
-    image = plate
+    image = image
     eye[0].show(org,frame='original')
     eye[0].show(image,wait=10)
 
-eye[0].close()'''
+eye[0].close()
 
 '''*************************************************
 *                                                  *
