@@ -84,6 +84,8 @@ def main():
         print('trainCascade.py autogen [param]')
         print('param:\tnumber/class -- main_image -- h_size -- numstate -- state(repackage,unrepackage) -- feature(HAAR, HOG, LBP)')
         print('\t1000 \t\ttrain-0 \t24 \t10 \t\trepackage \t\t\tHAAR\n')
+        print('------------------------------------------------------------------------------------')
+        print('train image numbers per class : '+str(len( (str(open('dataCompress'+dirCom+'dataset_0_train.txt','r').read()).split('\n'))[:-1] )))
         
 
     elif str(inputKey[0]) == 'remove_xml':
@@ -356,7 +358,7 @@ def run_opencv_traincascade(main_class='0',numpos=0,numneg=0,numstate=0,feature=
     
     weight, height = Image.open('main_img'+dirCom+os.listdir('main_img')[0]).size
     
-    command = 'opencv_traincascade -featureType '+str(feature)+' -data output_data'+dirCom+str(main_class) +dirCom +' -vec positives.vec -bg bg_neg.txt -numPos '+str(numpos)+' -numNeg '+str(numneg)+' -numStages '+str(numstate)+' -w '+str(weight)+' -h '+str(height)+' -minHitRate 0.995 -maxFalseAlarmRate 0.5 -weightTrimRate 0.95 -precalcValBufSize '+str(memoryUse)+' -precalcIdxBufSize '+str(memoryUse)
+    command = 'opencv_traincascade -featureType '+str(feature)+' -data output_data'+dirCom+str(main_class) +dirCom +' -vec positives.vec -bg bg_neg.txt -numPos '+str(numpos)+' -numNeg '+str(numneg)+' -numStages '+str(numstate)+' -w '+str(weight)+' -h '+str(height)+' -minHitRate 0.998 -maxFalseAlarmRate 0.5 -weightTrimRate 0.94 -precalcValBufSize '+str(memoryUse)+' -precalcIdxBufSize '+str(memoryUse)
     
     os.system(command)
 
@@ -452,7 +454,7 @@ def imagePostProcess(mainImage='',posMultiply=1):
     
     path = 'dataExtract'
     fileList= [f for f in os.listdir(path) if str(f).split('_')[1] != mainImage]
-    kernel = np.ones((kernelSize,kernelSize),np.uint8)
+    kernel = np.ones((int(sqrt(kernelSize)),int(sqrt(kernelSize))),np.uint8)
     kernel_float = np.ones((kernelSize,kernelSize),np.float32)/(pow(kernelSize,2))
 
     if posMultiply-1 == 0:

@@ -35,7 +35,7 @@ class multiCascade():
             self.dirCom = '/'
 
         self.scaleWeightHeight = 0.5
-        self.testResizeH = 200
+        self.testResizeH = 60
 
         self.multiClassifiers = []
         self.listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six','seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
@@ -104,8 +104,15 @@ class multiCascade():
     def testCascade(self,feature):
         ''' test classifier by test data. '''	
         
-        name = [i for i in os.listdir('output_data') if len(str(i).split('.')) != 1 ][0]
+        name = [i for i in os.listdir('output_data') if len(str(i).split('.')) != 1 ]
+        if name != []:
+            name = name[0]
+        else :
+            name = 'predictHAAR_x.txt'
+            
         keepToFile = open('output_data'+str(self.dirCom)+str(name),'a+')
+        
+
         for suffixSelect in [0] :# ['test','train','validate']
             keepData={}
             keepDataAll = {}
@@ -188,6 +195,7 @@ class multiCascade():
                 print('\t\tf score \t:'+str(f_score)+' %')
                 print('\t\taccuracy \t:'+str(accuracy*100)+' %\n')   
 
+                
                 keepToFile.write(str(object)+'\t'+str(precision*100)+'\t'+str(recall*100)+'\t'+str(f_score)+'\t'+str(accuracy*100)+'\t'+str((toc_n-tic_n)/len(image))+'\n' )
 
             toc = clock()
@@ -207,11 +215,13 @@ class multiCascade():
             print('\t\tf score \t:'+str(summaryF_score)+' %')
             print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %\n')
 
+            
             keepToFile.write('summary\t'+str(summaryPrecision*100)+'\t'+str(summaryRecall*100)+'\t'+str(summaryF_score)+'\t'+str(summaryAccuracy*100)+'\t'+str((toc-tic)/imageCount)+'\n' )
             
 
             # print('summary accuracy :'+str(sum(keepData.values())/len(keepData))+' %')
             # print(keepDataAll)
+        
         keepToFile.close()
         saveFileLen = len(os.listdir('output_data'+self.dirCom+'keep_predict_test'))
         shutil.move('output_data'+self.dirCom+str(name),'output_data'+self.dirCom+'keep_predict_test'+self.dirCom+str(name).split('.')[0]+'_'+str(saveFileLen)+'.txt' )

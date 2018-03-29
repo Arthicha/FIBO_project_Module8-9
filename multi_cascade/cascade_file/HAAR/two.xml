@@ -7,9 +7,9 @@
   <width>32</width>
   <stageParams>
     <boostType>GAB</boostType>
-    <minHitRate>9.9500000476837158e-01</minHitRate>
+    <minHitRate>9.9800002574920654e-01</minHitRate>
     <maxFalseAlarm>5.0000000000000000e-01</maxFalseAlarm>
-    <weightTrimRate>9.4999998807907104e-01</weightTrimRate>
+    <weightTrimRate>9.3999999761581421e-01</weightTrimRate>
     <maxDepth>1</maxDepth>
     <maxWeakCount>100</maxWeakCount></stageParams>
   <featureParams>
@@ -20,44 +20,20 @@
   <stages>
     <!-- stage 0 -->
     <_>
-      <maxWeakCount>3</maxWeakCount>
-      <stageThreshold>-1.0956745147705078e+00</stageThreshold>
+      <maxWeakCount>1</maxWeakCount>
+      <stageThreshold>9.6078431606292725e-01</stageThreshold>
       <weakClassifiers>
         <_>
           <internalNodes>
-            0 -1 1 1.7986682057380676e-01</internalNodes>
+            0 -1 0 1.3941760361194611e-01</internalNodes>
           <leafValues>
-            -9.9799400568008423e-01 9.6059113740921021e-01</leafValues></_>
-        <_>
-          <internalNodes>
-            0 -1 2 7.8092589974403381e-02</internalNodes>
-          <leafValues>
-            -9.8557978868484497e-01 8.9888966083526611e-01</leafValues></_>
-        <_>
-          <internalNodes>
-            0 -1 0 2.3914930224418640e-01</internalNodes>
-          <leafValues>
-            -9.8947107791900635e-01 8.8789927959442139e-01</leafValues></_></weakClassifiers></_></stages>
+            -1. 9.6078431606292725e-01</leafValues></_></weakClassifiers></_></stages>
   <features>
     <_>
       <rects>
         <_>
-          9 0 11 12 -1.</_>
+          12 1 7 10 -1.</_>
         <_>
-          9 6 11 6 2.</_></rects>
-      <tilted>0</tilted></_>
-    <_>
-      <rects>
-        <_>
-          11 1 10 10 -1.</_>
-        <_>
-          11 6 10 5 2.</_></rects>
-      <tilted>0</tilted></_>
-    <_>
-      <rects>
-        <_>
-          14 3 5 8 -1.</_>
-        <_>
-          14 7 5 4 2.</_></rects>
+          12 6 7 5 2.</_></rects>
       <tilted>0</tilted></_></features></cascade>
 </opencv_storage>
