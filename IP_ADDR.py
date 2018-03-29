@@ -285,14 +285,15 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
             if (area>min_area*image_area) and (area < image_area*max_area)and(len(approx) == 4) and(hi[2]!=-1)and(hi[1]==-1):
                 plate.append(approx)
                 cv2.drawContours(org, [approx], -1, (255, 255, 255), 2)
-        return plate
-
-    def Get_Word2(org,plate,thres_kirnel=21,boundary=20,black_tollerance=10,image_size=(60,30)):
-        listOfWord = []
         for i in range(0,len(plate)):
             plate[i] = np.array(plate[i])
             plate[i] = np.reshape(plate[i],(4,2))
             plate[i] = __class__.four_point_transform(org,plate[i])
+        return plate
+
+    def Get_Word2(plate,thres_kirnel=21,boundary=20,black_tollerance=10,image_size=(60,30)):
+        listOfWord = []
+        for i in range(0,len(plate)):
             word = __class__.binarize(plate[i],method=__class__.SAUVOLA_THRESHOLDING,value=thres_kirnel)
             wx,wy = word.shape
             bou = boundary

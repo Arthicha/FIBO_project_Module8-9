@@ -79,23 +79,22 @@ def genny(font_path,font,wordlist):
             process += 1
             # print(y)
             img = ipaddr.font_to_image(font_path + y, Font_Size, 0, x)
-            # cv2.imshow("suck",img)
-            plate = ipaddr.get_plate(img, Image_Shape)
-            plate = plate[0].UnrotateWord
-            img = np.array(plate)
 
+            #img = np.resize(img,(Image_Shape[1],Image_Shape[0]))
+            plate = ipaddr.Get_Plate2(img)
+            plate = ipaddr.Get_Word2(plate,image_size=Image_Shape)#get_plate(img, Image_Shape)
+            img = np.array(plate[0])
             #ret, img = cv2.threshold(img, 200, 255,0)
             for i in range(0,AUGMOUNT):
                 image = copy.deepcopy(img)
                 image = RND_MAGNIFY(image)
                 image = RND_MORPH(image)
                 image = RND_MOVE(image)
-                #images = 25*(image//25)
                 stringy = np.array2string(((image.ravel())).astype(int), max_line_width=Image_Shape[0]*Image_Shape[1]*(AUGMOUNT+2),separator=',')
                 write += stringy[1:-1] + "\n"
-
-                #cv2.imshow('image',images)
-                #cv2.waitKey(300)
+                if i == 0:
+                    cv2.imshow('image',image)
+                    cv2.waitKey(1)
 
             if process==len(font)*0.2:
                 open(Save_Path+"dataset" + "_" + filename[x]+"_"+"test" + '.txt', 'w').close()
