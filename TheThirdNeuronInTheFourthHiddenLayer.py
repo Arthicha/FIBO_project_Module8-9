@@ -30,6 +30,9 @@ from Retinutella_theRobotEye import Retinutella
 # 5. visualization module
 import matplotlib.pyplot as plt
 
+# 6. image processing module
+import cv2
+
 '''*************************************************
 *                                                  *
 *             configuration variable               *
@@ -56,32 +59,13 @@ PATH = os.getcwd()
 MODEL_PATH = PATH + MODEL_DIR
 
 
-eye = [Retinutella('front',1,0,1)]
-
-'''*************************************************
-*                                                  *
-*                   main program                   *
-*                                                  *
-*************************************************'''
-closing = 3
-while(1):
-    image = eye[0].getImage()
-    org = copy.deepcopy(image)
-    image = IP.binarize(image,method=IP.SAUVOLA_THRESHOLDING,value=15)
-    #image = IP.morph(image,mode=IP.CLOSING,value=[closing,closing])
-    plate = IP.get_plate(image,(60,30))[0].UnrotateWord
-    image = image
-    eye[0].show(org,frame='original')
-    eye[0].show(image,wait=10)
-
-eye[0].close()
+eye = [Retinutella('front',0,0,1)]
 
 '''*************************************************
 *                                                  *
 *                     function                     *
 *                                                  *
 *************************************************'''
-
 
 
 def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2],dtype=np.uint8):
@@ -138,5 +122,73 @@ def getData(foldername='data0-9compress',n=-1,ttv=[0,1,2],dtype=np.uint8):
     testingSet  = [TestTrainValidate[ttv[0]],LabelTTT[ttv[0]]]
     validationSet = [TestTrainValidate[ttv[2]],LabelTTT[ttv[2]]]
     return testingSet,trainingSet,validationSet
+
+
+def crop_image(img,msk,tol=0):
+    # img is image data
+    # tol  is tolerance
+    mask = msk>tol
+    return img[np.ix_(mask.any(1),mask.any(0))]
+
+def Get_Plat2(org,thres_kirnel=21,min_area=0.05,max_area=0.9):
+    image = copy.deepcopy(org)
+    image = IP.binarize(image,method=IP.SAUVOLA_THRESHOLDING,value=thres_kirnel)
+    image_area = image.shape[0]*image.shape[1]
+    img, contours, hierarchy = cv2.findContours(image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+    plate = []
+    for i in range(0,len(contours)):
+        cnt = contours[i]
+        hi = hierarchy[0][i]
+        epsilon = 0.1*cv2.arcLength(cnt,True)
+        approx = cv2.approxPolyDP(cnt,epsilon,True)
+        area = cv2.contourArea(cnt)
+        if (area>min_area*image_area) and (area < image_area*max_area)and(len(approx) == 4) and(hi[2]!=-1)and(hi[1]==-1):
+            plate.append(approx)
+            cv2.drawContours(org, [approx], -1, (255, 255, 255), 2)
+    return plate
+
+def Get_Word2(plate,thres_kirnel=21,boundary=20,black_tollerance=10,image_size=(60,30)):
+    listOfWord = []
+    for i in range(0,len(plate)):
+        plate[i] = np.array(plate[i])
+        plate[i] = np.reshape(plate[i],(4,2))
+        plate[i] = IP.four_point_transform(org,plate[i])
+        word = IP.binarize(plate[i],method=IP.SAUVOLA_THRESHOLDING,value=thres_kirnel)
+        wx,wy = word.shape
+        bou = boundary
+        word = 255-np.array(word)
+        word = word[bou:wy-bou,bou:wx-bou]
+        plate[i] = plate[i][bou:wy-bou,bou:wx-bou]
+        #word = IP.morph(word,mode=IP.OPENING,value=[5,5])
+        word = crop_image(plate[i],word,tol=black_tollerance)
+        if word != []:
+            word = cv2.resize(word,image_size)
+        listOfWord.append(word)
+    return listOfWord
+
+'''*************************************************
+*                                                  *
+*                   main program                   *
+*                                                  *
+*************************************************'''
+
+closing = 3
+SAU_KIR = 21
+min_area = 0.05
+while(1):
+    image = eye[0].getImage()
+    org = copy.deepcopy(image)
+    plate = IP.Get_Plate2(org)
+    word = IP.Get_Word2(org,plate)
+    for i in range(0,len(word)):
+        if len(word[i]) != 0:
+            eye[0].show(word[i],frame='plate'+str(i))
+    eye[0].show(org,frame='original',wait=10)
+    for i in range(0,len(word)):
+        cv2.destroyWindow('plate'+str(i))
+    #eye[0].show(image,wait=10)
+eye[0].close()
+
+
 
 
