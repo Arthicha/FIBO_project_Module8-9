@@ -66,8 +66,12 @@ class TenzorCNN:
                     input_neurons = tf.layers.dropout(inputs=image_batch, rate=keep_prob)
                 else:
                     input_neurons = image_batch
+
             else:
                 input_neurons = self.pool[-1]
+
+            with tf.name_scope('dropout_layer_' + str(i)):
+                input_neurons = tf.nn.dropout(input_neurons, keep_prob)
 
             with tf.name_scope("conv"+str(i)):
                 self.conv_relu.append(tf.layers.conv2d(inputs=input_neurons, filters=hidden_layer[i], kernel_size=kernel_size[i],
@@ -78,6 +82,7 @@ class TenzorCNN:
                     imgZ = imgZ//(pool_size[i][0]*pool_size[i][1])
                 else:
                     self.pool.append(self.conv_relu[-1])
+
 
 
         with tf.name_scope("dense"):

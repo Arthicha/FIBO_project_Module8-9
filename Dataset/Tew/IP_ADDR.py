@@ -11,6 +11,7 @@ from os import listdir
 from os.path import isfile, join
 from PIL import Image, ImageFont, ImageDraw
 from Foundation import Binarization, Filter
+import copy
 
 
 class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
@@ -225,7 +226,7 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
         image.text(((__class__.CREATE_SHAPE[0] - w) / 2, (__class__.CREATE_SHAPE[1] - h) / 2), string, font=Text_Font,
                    fill="black")
         img = np.array(img)
-        cv2.rectangle(img, (60, 60), (__class__.CREATE_SHAPE[0] - 60, __class__.CREATE_SHAPE[1] - 60), 0, thickness=4)
+        cv2.rectangle(img, (60, 60), (__class__.CREATE_SHAPE[0] - 60, __class__.CREATE_SHAPE[1] - 60), 0, thickness=2)
         return img
 
     def distorse(img, function=None, axis='x', alpha=1.0, beta=1.0):
@@ -261,6 +262,49 @@ class Image_Processing_And_Do_something_to_make_Dataset_be_Ready():
                 for i in range(img.shape[0]):
                     img[i, :] = np.roll(img[i, :], int(dist_func(i)))
         return img
+
+
+    def crop_image(img,msk,tol=0):
+        # img is image data
+        # tol  is tolerance
+        mask = msk>tol
+        return img[np.ix_(mask.any(1),mask.any(0))]
+
+    def Get_Plate2(org,thres_kirnel=21,min_area=0.05,max_area=0.9):
+        image = copy.deepcopy(org)
+        image = __class__.binarize(image,method=__class__.SAUVOLA_THRESHOLDING,value=thres_kirnel)
+        image_area = image.shape[0]*image.shape[1]
+        img, contours, hierarchy = cv2.findContours(image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+        plate = []
+        for i in range(0,len(contours)):
+            cnt = contours[i]
+            hi = hierarchy[0][i]
+            epsilon = 0.1*cv2.arcLength(cnt,True)
+            approx = cv2.approxPolyDP(cnt,epsilon,True)
+            area = cv2.contourArea(cnt)
+            if (area>min_area*image_area) and (area < image_area*max_area)and(len(approx) == 4) and(hi[2]!=-1)and(hi[1]==-1):
+                plate.append(approx)
+                cv2.drawContours(org, [approx], -1, (255, 255, 255), 2)
+        return plate
+
+    def Get_Word2(org,plate,thres_kirnel=21,boundary=20,black_tollerance=10,image_size=(60,30)):
+        listOfWord = []
+        for i in range(0,len(plate)):
+            plate[i] = np.array(plate[i])
+            plate[i] = np.reshape(plate[i],(4,2))
+            plate[i] = __class__.four_point_transform(org,plate[i])
+            word = __class__.binarize(plate[i],method=__class__.SAUVOLA_THRESHOLDING,value=thres_kirnel)
+            wx,wy = word.shape
+            bou = boundary
+            word = 255-np.array(word)
+            word = word[bou:wy-bou,bou:wx-bou]
+            plate[i] = plate[i][bou:wy-bou,bou:wx-bou]
+            #word = IP.morph(word,mode=IP.OPENING,value=[5,5])
+            word = __class__.crop_image(plate[i],word,tol=black_tollerance)
+            if word != []:
+                word = cv2.resize(word,image_size)
+            listOfWord.append(word)
+        return listOfWord
 
     def magnifly(image, percentage=100, shiftxy=[0, 0]):
         # can use with color or gray scale image
