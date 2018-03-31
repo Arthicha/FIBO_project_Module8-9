@@ -27,12 +27,13 @@ import cv2
 
 dirCom = '/'
 scaleWeightHeight = 0.5
-scalePosNeg = 1
-memoryUse = 8192
-multiPos = 2
+scalePosNeg = 5
+memoryUse = 4096
+multiPos = 1
 
 kernelSize = 4
-postProcessList = ['erosion','dilation','opening','closing','gradient','filter2d','blur','medianBlur','bilateralFilter']
+# postProcessList = ['erosion','dilation','opening','closing','gradient','filter2d','blur','medianBlur','bilateralFilter']
+postProcessList = ['opening','closing','blur','bilateralFilter']
 listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six',
                 'seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH',
                 'SevenTH','EightTH','NineTH']
@@ -61,6 +62,13 @@ def main():
     elif platform.system() == 'Windows':
         dirCom = '\\'
 
+    if not os.path.isdir('dataExtract'):
+        os.mkdir('dataExtract')
+    if not os.path.isdir('data'):
+        os.mkdir('data')
+    if not os.path.isdir('main_img'):
+        os.mkdir('main_img')
+
     if inputKey == [] or str(inputKey[0]) == 'help':
         print('set data')
         print('trainCascade.py [method] [param] \nmethod:\tgen_image\tresize\t\t\tcreate_bg\tremove_xml')
@@ -76,6 +84,9 @@ def main():
         print('trainCascade.py autogen [param]')
         print('param:\tnumber/class -- main_image -- h_size -- numstate -- state(repackage,unrepackage) -- feature(HAAR, HOG, LBP)')
         print('\t1000 \t\ttrain-0 \t24 \t10 \t\trepackage \t\t\tHAAR\n')
+        print('------------------------------------------------------------------------------------')
+        print('train image numbers per class : '+str(len( (str(open('dataCompress'+dirCom+'dataset_0_train.txt','r').read()).split('\n'))[:-1] )))
+        
 
     elif str(inputKey[0]) == 'remove_xml':
         deleteMainCascadeFile()
@@ -147,8 +158,6 @@ def generate_picture(limitFilePerClass = 50):
     numCount = 0
     numKeep = 0
 
-
-
     '''*************************************************
     *                                                  *
     *                   prepare data                   *
@@ -178,6 +187,7 @@ def generate_picture(limitFilePerClass = 50):
     *              read & generate data                *
     *                                                  *
     *************************************************'''
+
 
     for s in range(1,3): # traain & validate
         for j in range(0,30): # 30 class
@@ -348,7 +358,8 @@ def run_opencv_traincascade(main_class='0',numpos=0,numneg=0,numstate=0,feature=
     
     weight, height = Image.open('main_img'+dirCom+os.listdir('main_img')[0]).size
     
-    command = 'opencv_traincascade -featureType '+str(feature)+' -data output_data'+dirCom+str(main_class) +dirCom +' -vec positives.vec -bg bg_neg.txt -numPos '+str(numpos)+' -numNeg '+str(numneg)+' -numStages '+str(numstate)+' -w '+str(weight)+' -h '+str(height)+' -precalcValBufSize '+str(memoryUse)+' -precalcIdxBufSize '+str(memoryUse)
+    command = 'opencv_traincascade -featureType '+str(feature)+' -data output_data'+dirCom+str(main_class) +dirCom +' -vec positives.vec -bg bg_neg.txt -numPos '+str(numpos)+' -numNeg '+str(numneg)+' -numStages '+str(numstate)+' -w '+str(weight)+' -h '+str(height)+' -minHitRate 0.998 -maxFalseAlarmRate 0.5 -weightTrimRate 0.94 -precalcValBufSize '+str(memoryUse)+' -precalcIdxBufSize '+str(memoryUse)
+    
     os.system(command)
 
 def run_opencv_haartraining():
@@ -363,7 +374,7 @@ def run_opencv_performance():
 
 def AutoGenerateClassification(numberPerClass=1000, main_img='train-0',size=24, numstate=10, state ='repackage', feature='HAAR'):
     '''auto generate 30 classification by auto parameter.'''
-    
+
     if str(state) == 'repackage' :
         print('gen_image '+str(numberPerClass)+' per class')
         generate_picture(limitFilePerClass = numberPerClass)
@@ -381,9 +392,12 @@ def AutoGenerateClassification(numberPerClass=1000, main_img='train-0',size=24, 
             countPos = len(str(f.read()).split('\n'))
 
         num = predictNumPosNumNeg(countPos=countPos*4/5,countNeg=countNeg*4/5)    
-        # renum = predictNumPosNumNeg(countPos=num[0]*4/5,countNeg=num[1]*4/5)    
+            
         run_opencv_createsamples(main_class=selectClass,number=int(num[0]*5/4))
         run_opencv_traincascade(main_class=selectClass,numpos=int(num[0]),numneg=int(num[1]),numstate=int(numstate),feature=feature)
+
+    f = open('output_data'+str(dirCom)+'predict'+str(feature)+'_'+str(num[0])+'_'+str(int(num[1]))+'.txt','w+')
+    f.close()
 
     print('wait for delete unuse data')
     for f in [f for f in os.listdir('dataExtract')]:
@@ -415,12 +429,16 @@ def predictNumPosNumNeg(countPos,countNeg):
         pos /= 10
         countKeep+=1
     pos = int(pow(10,countKeep)*int(pos))
-
+    
     countKeep = 0
     while neg >= 10:
         neg /= 10
         countKeep+=1
     neg = int(pow(10,countKeep)*int(neg))
+    
+    
+    # pos = int(pos/100)*100
+    # neg = int(neg/100)*100
     
 
     return [pos,neg]
@@ -436,7 +454,7 @@ def imagePostProcess(mainImage='',posMultiply=1):
     
     path = 'dataExtract'
     fileList= [f for f in os.listdir(path) if str(f).split('_')[1] != mainImage]
-    kernel = np.ones((kernelSize,kernelSize),np.uint8)
+    kernel = np.ones((int(sqrt(kernelSize)),int(sqrt(kernelSize))),np.uint8)
     kernel_float = np.ones((kernelSize,kernelSize),np.float32)/(pow(kernelSize,2))
 
     if posMultiply-1 == 0:

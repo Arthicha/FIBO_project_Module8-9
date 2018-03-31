@@ -7,6 +7,7 @@
 *************************************************'''
 
 import os
+import shutil
 import sys
 import platform
 from time import clock
@@ -34,8 +35,7 @@ class multiCascade():
             self.dirCom = '/'
 
         self.scaleWeightHeight = 0.5
-        self.testResizeH = 200
-        self.
+        self.testResizeH = 60
 
         self.multiClassifiers = []
         self.listOfClass = [0,1,2,3,4,5,6,7,8,9]+['zero','one','two','three','four','five','six','seven','eight','nine']+['ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
@@ -88,11 +88,11 @@ class multiCascade():
                         
                         returnData[str(selectClassifier).split('.')[0]] +=1
                         output2.append((x,y,w,h))
-                        # print((w,h))
-                        cv2.rectangle(image, (x,y), (x+w,y+h), 0, 1)
+                        # print((selectClassifier, w,h))
+                        # cv2.rectangle(image, (x,y), (x+w,y+h), 255, 1)
                         # cv2.imshow('test',image)
                         # cv2.waitKey(0)
-                        image = img
+                        # image = img
                         # returnData.append(str(selectClassifier.split('.')[0]))
         
         
@@ -104,7 +104,16 @@ class multiCascade():
     def testCascade(self,feature):
         ''' test classifier by test data. '''	
         
-        for suffixSelect in [0,2] :# ['test','train','validate']
+        name = [i for i in os.listdir('output_data') if len(str(i).split('.')) != 1 ]
+        if name != []:
+            name = name[0]
+        else :
+            name = 'predictHAAR_x.txt'
+            
+        keepToFile = open('output_data'+str(self.dirCom)+str(name),'a+')
+        
+
+        for suffixSelect in [0] :# ['test','train','validate']
             keepData={}
             keepDataAll = {}
             for i in range(0,30): # 30 class
@@ -132,7 +141,7 @@ class multiCascade():
 
                 # print head of class
                 # print("test : " +str(object))
-                
+
                 for i in range(len(image)):
                     image[i] = np.fromstring(image[i], dtype=float, sep=',')
                     image[i] = np.array(image[i], dtype=np.uint8)*255
@@ -146,26 +155,21 @@ class multiCascade():
                     detect = self.detectFromCascade(image=image[i],feature=feature)
                     
                     keepData[object]+=detect[str(object)]
-
+                    
                     for obj in self.listOfClass:
                         keepDataAll[str(object)][str(obj)] += int(detect[str(obj)])
-
-                # keepData[object] = int(keepData[object])*100/len(image)
-
-                # keepData[object] = (100*(len(keepDataAll[str(object)])-1)-sum(keepDataAll[str(object)].values())+2*keepData[object] )/len(keepDataAll[str(object)]) 
-                # keepData[object] = keepData[object]/sum(keepDataAll[str(object)].values())
-                # listDat = [ 1-(i/100) for i in keepDataAll[str(object)].values() if keepDataAll[str(object)][str(object)] != i ]
-                # keepData[object] = np.prod( listDat )*keepData[object]
 
                 toc_n = clock()
 
                 # print(keepDataAll[str(object)])
+
+                
                 max_per_class = max( keepDataAll[str(object)].values() )
                 TP = keepDataAll[str(object)][str(object)]
                 FP = sum([ i for i in keepDataAll[str(object)].values() if i != keepDataAll[str(object)][str(object)] ])
                 TN = max_per_class*29 - FP
                 FN = max_per_class - TP
-                
+
                 '''*************************************************
                 *                                                  *
                 *          find accuracy recall & precision        *
@@ -181,15 +185,18 @@ class multiCascade():
                 recall = TP/(TP+TN)
                 accuracy = (TP+TN)/(TP+TN+FP+FN)
                 if (precision+recall != 0):
-                    f_score = 2*(precision*recall)/(precision+recall)
+                    f_score = 2*(precision*recall)/(precision+recall)*100
                 else : 
-                    f_score = 'inf'
+                    f_score = 'error'
                 print('test detect '+str(object) + ' average time per image : '+str((toc_n-tic_n)/len(image)) + ' s')
                 print('FN TP FP TN :' +str((FN,TP,FP,TN)))
                 print('\t\tprecision \t:'+str(precision*100)+' %')
                 print('\t\trecall \t\t:'+str(recall*100)+' %')   
-                print('\t\taccuracy \t:'+str(accuracy*100)+' %')   
-                print('\t\tf score \t:'+str(f_score*100)+' %\n')
+                print('\t\tf score \t:'+str(f_score)+' %')
+                print('\t\taccuracy \t:'+str(accuracy*100)+' %\n')   
+
+                
+                keepToFile.write(str(object)+'\t'+str(precision*100)+'\t'+str(recall*100)+'\t'+str(f_score)+'\t'+str(accuracy*100)+'\t'+str((toc_n-tic_n)/len(image))+'\n' )
 
             toc = clock()
 
@@ -197,18 +204,27 @@ class multiCascade():
             summaryRecall = summaryTP/(summaryTP+summaryTN)
             summaryAccuracy = (summaryTP+summaryTN)/(summaryTP+summaryTN+summaryFP+summaryFN)
             if (summaryPrecision+summaryRecall != 0):
-                summaryF_score = 2*(summaryPrecision*summaryRecall)/(summaryPrecision+summaryRecall)
+                summaryF_score = 2*(summaryPrecision*summaryRecall)/(summaryPrecision+summaryRecall)*100
             else:
-                summaryF_score = 'inf'
+                summaryF_score = 'error'
 
             print('summary : '+str(self.suffix[suffixSelect]) + ' average time per image : '+ str((toc-tic)/imageCount ) + ' s')
             print('FN TP FP TN :' +str((summaryFN,summaryTP,summaryFP,summaryTN)))
             print('\t\tprecision\t:'+str(summaryPrecision*100)+' %')
             print('\t\trecall\t\t:'+str(summaryRecall*100)+' %')
-            print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %')
-            print('\t\tf score \t:'+str(summaryF_score*100)+' %\n')
+            print('\t\tf score \t:'+str(summaryF_score)+' %')
+            print('\t\taccuracy\t:'+str(summaryAccuracy*100)+' %\n')
+
+            
+            keepToFile.write('summary\t'+str(summaryPrecision*100)+'\t'+str(summaryRecall*100)+'\t'+str(summaryF_score)+'\t'+str(summaryAccuracy*100)+'\t'+str((toc-tic)/imageCount)+'\n' )
+            
+
             # print('summary accuracy :'+str(sum(keepData.values())/len(keepData))+' %')
             # print(keepDataAll)
+        
+        keepToFile.close()
+        saveFileLen = len(os.listdir('output_data'+self.dirCom+'keep_predict_test'))
+        shutil.move('output_data'+self.dirCom+str(name),'output_data'+self.dirCom+'keep_predict_test'+self.dirCom+str(name).split('.')[0]+'_'+str(saveFileLen)+'.txt' )
         return 0
 
     def copyCascadeFile(self,feature ):
