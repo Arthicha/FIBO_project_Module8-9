@@ -1,3 +1,14 @@
+# Change all of files path to your directory
+# files use to train this model is inside FIBO_project_Module8-9\\Dataset\\Tew\\compress_dataset\\
+
+
+
+'''*************************************************
+*                                                  *
+*                  import module                   *
+*                                                  *
+*************************************************'''
+
 import cv2
 import numpy as np
 import os
@@ -12,6 +23,12 @@ from sklearn.metrics import confusion_matrix,classification_report
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
+
+'''*************************************************
+*                                                  *
+*                   function                       *
+*                                                  *
+*************************************************'''
 
 def confusionMat(correct_Labels, Predicted_Labels):
     labels = ['0','1','2','3','4','5','6','7','8','9','zero','one','two','three','four','five','six','seven','eight','nine','ZeroTH','OneTH','TwoTH','ThreeTH','FourTH','FiveTH','SixTH','SevenTH','EightTH','NineTH']
@@ -105,9 +122,17 @@ def HOG_int() :
     hog = cv2.HOGDescriptor(winSize,blockSize,blockStride,cellSize,nbins,derivAperture,winSigma,histogramNormType,L2HysThreshold,gammaCorrection,nlevels, signedGradient)
     return hog
 
-N_SPLIT = 10
-Kfold_Type = "StratifiedShuffleSplit"
-TEST_AND_VALIDATE_PERCENT =0.4 # use float value from 1 -0
+def plotKgraph(a,b):
+    plt.plot(a, b)
+    plt.xlabel('Number of Neighbors K')
+    plt.ylabel('ACCURACY')
+    plt.show()
+
+'''*************************************************
+*                                                  *
+*                 configuration                    *
+*                                                  *
+*************************************************'''
 
 
 # HOG parameters
@@ -123,9 +148,11 @@ L2HysThreshold = 0.2
 gammaCorrection = 1
 nlevels = 64
 signedGradients = True
-
 hog = HOG_int()
 hog_descriptors = []
+
+
+# model parameters
 lables = []
 test_hog_descriptors = []
 test_lables = []
@@ -133,6 +160,16 @@ val_hog_descriptors = []
 val_lables = []
 path = 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Dataset\\Tew\\compress_dataset\\'
 dirs = os.listdir(path)
+TEST_SC = []
+K = []
+
+
+
+'''*************************************************
+*                                                  *
+*                 main function                    *
+*                                                  *
+*************************************************'''
 
 #Import test and training data
 for files in dirs:
@@ -201,9 +238,6 @@ test_lables = np.squeeze(test_lables)
 val_hog_descriptors = np.squeeze(val_hog_descriptors)
 val_lables = np.squeeze(val_lables)
 
-# print(hog_descriptors.shape)
-# print(test_hog_descriptors.shape)
-# print(val_hog_descriptors.shape)
 print('Begining feature selection...')
 #feature selection
 forest = ExtraTreesClassifier()
@@ -212,83 +246,41 @@ modeltree = SelectFromModel(forest,prefit=True)
 X_new = modeltree.transform(hog_descriptors)
 test_new = modeltree.transform(test_hog_descriptors)
 
-# for m in range(3,12)
-#     print('REAL DATA FILE********************************************* K :'+str(m))
-#     # print('Begining Knn fitting...')
-#     neigh = KNeighborsClassifier(n_neighbors=12)
-#     neigh.fit(X_new, lables)
-#     joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_real.pkl')
-#     # print('Model saved!')
-#     pred = neigh.predict(test_new)
-#     # print('predicted....')
-#     # print(pred.shape)
-#     # print('Generate confusion matrix...')
-#     # confusionMat(test_lables, pred)
-#
-#
-#     best_score=0
-#     all_hog_descriptors= [val_hog_descriptors,hog_descriptors,test_hog_descriptors]
-#     all_target =[val_lables,lables,test_lables]
-#     for i in range(0,2):
-#             train_feature = all_hog_descriptors[i].tolist()+all_hog_descriptors[i+1].tolist()
-#             train_target =  all_target[i].tolist()+all_target[i+1].tolist()
-#             neigh.fit(train_feature, train_target)
-#             train_score = neigh.score(train_feature, train_target)
-#             print('loop no ' + str(i))
-#             print("train score :   " + str(train_score))
-#             test_score = neigh.score(all_hog_descriptors[(i+2)%3].tolist(), all_target[(i+2)%3].tolist())
-#             print("test score :   " + str(test_score))
-#             Label_Pred = neigh.predict(all_hog_descriptors[(i+2)%3].tolist())
-#             # confusionMat(all_target[(i+2)%3].tolist(), Label_Pred)
-#             print(classification_report( all_target[(i+2)%3].tolist(), Label_Pred))
-#             if test_score > best_score:
-#                 best_score = test_score
-#                 best_test_target =all_target[(i+2)%3].tolist()
-#                 best_pred=Label_Pred
-#                 s = neigh
-#     confusionMat(best_test_target, best_pred)
+#change the range of m to find k parameter
+for m in range(8,9):
+    print('REAL DATA FILE TRAINING********************************************* K :'+str(m))
+    # print('Begining Knn fitting...')
+    neigh = KNeighborsClassifier(n_neighbors=m)
+    neigh.fit(X_new, lables)
+    # save model
+    joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_real.pkl')
+    print('Model saved!')
+    pred = neigh.predict(test_new)
+    print('predicted....')
+    best_score=0
+    all_hog_descriptors= [val_hog_descriptors,hog_descriptors,test_hog_descriptors]
+    all_target =[val_lables,lables,test_lables]
+    for i in range(0,2):
+            train_feature = all_hog_descriptors[i].tolist()+all_hog_descriptors[i+1].tolist()
+            train_target =  all_target[i].tolist()+all_target[i+1].tolist()
+            neigh.fit(train_feature, train_target)
+            train_score = neigh.score(train_feature, train_target)
+            # print('test no :'+str(m)+' loop no : ' + str(i))
+            # print("train score :   " + str(train_score))
+            test_score = neigh.score(all_hog_descriptors[(i+2)%3].tolist(), all_target[(i+2)%3].tolist())
+            # print("test score :   " + str(test_score))
+            Label_Pred = neigh.predict(all_hog_descriptors[(i+2)%3].tolist())
+            # confusionMat(all_target[(i+2)%3].tolist(), Label_Pred)
+            # print(classification_report( all_target[(i+2)%3].tolist(), Label_Pred))
+            if test_score > best_score:
+                best_score = test_score
+                best_test_target =all_target[(i+2)%3].tolist()
+                best_pred=Label_Pred
+                s = neigh
+    confusionMat(best_test_target, best_pred)
+    print(best_score)
+    TEST_SC.append(best_score)
+    K.append(m)
+    print('*************************************************************************************')
+plotKgraph(K, TEST_SC)
 
-#     print('REAL DATA FILE********************************************* K :'+str(m))
-#     # print('Begining Knn fitting...')
-#     neigh = KNeighborsClassifier(n_neighbors=12)
-#     neigh.fit(X_new, lables)
-#     joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_real.pkl')
-#     # print('Model saved!')
-#     pred = neigh.predict(test_new)
-#     # print('predicted....')
-#     # print(pred.shape)
-#     # print('Generate confusion matrix...')
-#     # confusionMat(test_lables, pred)
-
-# print('REAL DATA FILE********************************************* K :'+str(m))
-# print('Begining Knn fitting...')
-neigh = KNeighborsClassifier(n_neighbors=7)
-neigh.fit(X_new, lables)
-joblib.dump(neigh, 'C:\\Users\\MSI-GE72MVR-7RG\\PycharmProjects\\FIBO_project_Module8-9\\Don\'t mess with me\\knn_model_real.pkl')
-# print('Model saved!')
-pred = neigh.predict(test_new)
-# print('predicted....')
-# print(pred.shape)
-# print('Generate confusion matrix...')
-# confusionMat(test_lables, pred)
-best_score=0
-all_hog_descriptors= [val_hog_descriptors,hog_descriptors,test_hog_descriptors]
-all_target =[val_lables,lables,test_lables]
-for i in range(0,2):
-    train_feature = all_hog_descriptors[i].tolist()+all_hog_descriptors[i+1].tolist()
-    train_target =  all_target[i].tolist()+all_target[i+1].tolist()
-    neigh.fit(train_feature, train_target)
-    train_score = neigh.score(train_feature, train_target)
-    print('loop no ' + str(i))
-    print("train score :   " + str(train_score))
-    test_score = neigh.score(all_hog_descriptors[(i+2)%3].tolist(), all_target[(i+2)%3].tolist())
-    print("test score :   " + str(test_score))
-    Label_Pred = neigh.predict(all_hog_descriptors[(i+2)%3].tolist())
-    # confusionMat(all_target[(i+2)%3].tolist(), Label_Pred)
-    print(classification_report( all_target[(i+2)%3].tolist(), Label_Pred))
-    if test_score > best_score:
-        best_score = test_score
-        best_test_target =all_target[(i+2)%3].tolist()
-        best_pred=Label_Pred
-        s = neigh
-confusionMat(best_test_target, best_pred)
